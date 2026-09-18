@@ -78,6 +78,14 @@ public final class EconomyServer {
 
     private void onServerStarted(MinecraftServer started) {
         this.server = started;
+
+        // Balances and advancement history are per-world on disk, but this object outlives
+        // any one world: a single-player client keeps the same mod instance across world
+        // loads. Clearing before loading is what makes them actually per-world - otherwise
+        // world A's balances survive into world B, because loading only adds entries.
+        economy.ledger().clear();
+        awarded.clear();
+
         BalancePersistence.load(started, economy.ledger(), awarded);
         rebuildPrices(started, null);
     }
@@ -87,6 +95,11 @@ public final class EconomyServer {
         // last time makes sure a change made in the final tick is not lost.
         BalancePersistence.markDirty(stopping, economy.ledger(), awarded);
         this.server = null;
+
+        // Drop the world's state now rather than waiting for the next world to clear it,
+        // so an idle client is not holding another world's balances in memory.
+        economy.ledger().clear();
+        awarded.clear();
     }
 
     /**

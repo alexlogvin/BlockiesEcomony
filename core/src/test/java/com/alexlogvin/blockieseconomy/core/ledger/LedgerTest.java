@@ -209,4 +209,44 @@ class LedgerTest {
         assertTrue(ledger.charge(ALICE, 100L, 0L).succeeded());
         assertFalse(ledger.canAfford(ALICE, 1L));
     }
+
+    @Test
+    @DisplayName("clear drops every balance, so one world cannot leak into the next")
+    void clearIsolatesWorlds() {
+        Ledger ledger = unlimited(0L);
+
+        // World A.
+        ledger.load(ALICE, 5_000L);
+        ledger.load(BOB, 250L);
+        assertEquals(5_000L, ledger.balance(ALICE));
+
+        // Unloading it must leave nothing behind. The store is per-world on disk, but the
+        // Ledger outlives any one world in single player, and load() only adds entries.
+        ledger.clear();
+
+        assertFalse(ledger.isKnown(ALICE));
+        assertFalse(ledger.isKnown(BOB));
+        assertEquals(0L, ledger.balance(ALICE), "an unknown player reads as the starting balance");
+        assertTrue(ledger.leaderboard(10).isEmpty());
+
+        // World B starts clean.
+        ledger.load(ALICE, 10L);
+        assertEquals(10L, ledger.balance(ALICE));
+        assertEquals(1, ledger.leaderboard(10).size());
+    }
+
+    @Test
+    @DisplayName("clear also resets rate limiting, so a new world starts unthrottled")
+    void clearResetsRateLimits() {
+        Ledger ledger = new Ledger(10_000L, new RateLimiter(2, 0));
+
+        assertTrue(ledger.charge(ALICE, 1L, 1_000L).succeeded());
+        assertTrue(ledger.charge(ALICE, 1L, 1_000L).succeeded());
+        assertEquals(TransactionResult.Status.RATE_LIMITED,
+                ledger.charge(ALICE, 1L, 1_000L).status());
+
+        ledger.clear();
+
+        assertTrue(ledger.charge(ALICE, 1L, 1_000L).succeeded());
+    }
 }

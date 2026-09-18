@@ -95,6 +95,11 @@ public final class RateLimiter {
         perPlayer.remove(player);
     }
 
+    /** Drops all tracking. Called when a world unloads. */
+    public void clear() {
+        perPlayer.clear();
+    }
+
     /**
      * A fixed-capacity ring of timestamps. Counting entries in the last minute needs no
      * allocation per trade, which matters when this runs on the server thread.

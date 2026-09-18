@@ -79,6 +79,18 @@ public final class Ledger {
         rateLimiter.forget(player);
     }
 
+    /**
+     * Drops every balance.
+     *
+     * <p>Called when a world unloads. Without it a single-player client carries one
+     * world's balances into the next: the store is per-world on disk, but this map is not,
+     * and loading only adds to it.
+     */
+    public void clear() {
+        balances.clear();
+        rateLimiter.clear();
+    }
+
     // ---- rate-limited player transactions --------------------------------------
 
     /** Charges a player. Rate limited, since it is reachable from a client packet. */

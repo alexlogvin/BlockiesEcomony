@@ -60,6 +60,11 @@ public final class AwardedAdvancements {
         byPlayer.remove(player);
     }
 
+    /** Drops all history. Called when a world unloads; this state is per-world. */
+    public void clear() {
+        byPlayer.clear();
+    }
+
     public int trackedPlayers() {
         return byPlayer.size();
     }

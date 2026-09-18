@@ -1,5 +1,6 @@
 package com.alexlogvin.blockieseconomy.price;
 
+import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.core.price.IngredientView;
 import com.alexlogvin.blockieseconomy.core.price.RecipeView;
 import java.util.ArrayList;
@@ -87,17 +88,33 @@ public final class GameAdapters {
         @Override
         public List<AdvancementInfo> advancements(MinecraftServer server) {
             List<AdvancementInfo> result = new ArrayList<AdvancementInfo>();
+            int technical = 0;
+
             for (AdvancementNode node : server.getAdvancements().tree().nodes()) {
+                AdvancementHolder holder = node.holder();
+
+                // An advancement with no display is technical, not an achievement. Vanilla
+                // uses these for the recipe-unlock system: 1277 of 1399 entries here are
+                // minecraft:recipes/*, and paying for them meant picking up one log
+                // unlocked three plank recipes and paid three prizes.
+                if (holder.value().display().isEmpty()) {
+                    technical++;
+                    continue;
+                }
+
                 int depth = 0;
                 AdvancementNode current = node;
                 while (current.parent() != null) {
                     current = current.parent();
                     depth++;
                 }
-                AdvancementHolder holder = node.holder();
                 result.add(new AdvancementInfo(
                         holder.id().toString(), current.holder().id().toString(), depth));
             }
+
+            BlockiesEconomy.LOGGER.debug(
+                    "Ignored {} technical advancements with no display (recipe unlocks).",
+                    technical);
             return result;
         }
 

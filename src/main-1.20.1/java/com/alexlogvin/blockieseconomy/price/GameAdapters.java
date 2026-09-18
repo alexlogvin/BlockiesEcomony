@@ -1,5 +1,6 @@
 package com.alexlogvin.blockieseconomy.price;
 
+import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.core.price.IngredientView;
 import com.alexlogvin.blockieseconomy.core.price.RecipeView;
 import java.util.ArrayDeque;
@@ -87,9 +88,20 @@ public final class GameAdapters {
         @Override
         public List<AdvancementInfo> advancements(MinecraftServer server) {
             List<AdvancementInfo> result = new ArrayList<AdvancementInfo>();
+            int technical = 0;
+
             for (Advancement advancement : server.getAdvancements().getAllAdvancements()) {
-                // getAllAdvancements returns only roots' descendants in no fixed order, so
-                // depth is computed by walking up rather than assumed from iteration order.
+                // An advancement with no display is technical, not an achievement. Vanilla
+                // uses these for the recipe-unlock system: 1277 of 1399 entries on 1.21.1
+                // are minecraft:recipes/*, and paying for them meant picking up one log
+                // unlocked three plank recipes and paid three prizes.
+                if (advancement.getDisplay() == null) {
+                    technical++;
+                    continue;
+                }
+
+                // getAllAdvancements returns nodes in no fixed order, so depth is computed
+                // by walking up rather than assumed from iteration order.
                 int depth = 0;
                 Advancement node = advancement;
                 while (node.getParent() != null) {
@@ -99,6 +111,10 @@ public final class GameAdapters {
                 result.add(new AdvancementInfo(
                         advancement.getId().toString(), node.getId().toString(), depth));
             }
+
+            BlockiesEconomy.LOGGER.debug(
+                    "Ignored {} technical advancements with no display (recipe unlocks).",
+                    technical);
             return result;
         }
 
