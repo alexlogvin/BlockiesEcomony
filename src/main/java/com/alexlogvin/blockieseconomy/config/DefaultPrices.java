@@ -89,13 +89,15 @@ public final class DefaultPrices {
 
         price(t, 5, "dirt", "coarse_dirt", "rooted_dirt", "sand", "red_sand", "gravel",
                 "cobblestone", "cobbled_deepslate", "grass_block", "podzol",
-                "mycelium", "mud", "clay", "snow_block", "ice", "magma_block",
-                "tuff", "calcite", "dripstone_block", "moss_block", "sandstone",
-                "red_sandstone", "andesite", "diorite", "granite", "stone",
+                "mycelium", "mud", "clay", "ice",
+                "tuff", "calcite", "dripstone_block", "moss_block",
+                "andesite", "diorite", "granite", "stone",
                 "deepslate", "obsidian");
+        // Craftable, so derived: sandstone and red_sandstone from sand, snow_block from
+        // snowballs, magma_block from magma cream, packed_mud from mud and wheat.
 
         price(t, 10, "clay_ball", "flint", "snowball", "pointed_dripstone", "glowstone",
-                "crying_obsidian", "gilded_blackstone", "packed_mud", "sculk", "sculk_vein");
+                "crying_obsidian", "gilded_blackstone", "sculk", "sculk_vein");
 
         price(t, 25, "amethyst_shard", "sculk_catalyst", "sculk_shrieker", "sculk_sensor");
     }
@@ -109,8 +111,10 @@ public final class DefaultPrices {
                 "dark_oak_log", "mangrove_log", "cherry_log", "pale_oak_log",
                 "crimson_stem", "warped_stem");
 
-        price(t, 35, "oak_wood", "spruce_wood", "birch_wood", "jungle_wood", "acacia_wood",
-                "dark_oak_wood", "mangrove_wood", "cherry_wood", "pale_oak_wood");
+        // The *_wood variants are crafted from four logs into three wood, so they derive
+        // and come out ABOVE a log. Pricing them by hand below a log was a real bug: the
+        // planks recipe accepts the whole #logs tag and picks its cheapest member, which
+        // dragged planks to 9 and sticks to 4 instead of the intended 10 and 5.
 
         price(t, 15, "oak_leaves", "spruce_leaves", "birch_leaves", "jungle_leaves",
                 "acacia_leaves", "dark_oak_leaves", "mangrove_leaves", "cherry_leaves",
@@ -156,10 +160,11 @@ public final class DefaultPrices {
                 "Renewable, so priced low enough that a farm is a slow earner rather",
                 "than a money printer.");
 
-        price(t, 10, "wheat_seeds", "melon_seeds", "pumpkin_seeds", "beetroot_seeds",
+        // pumpkin_seeds and melon_seeds are craftable from their fruit, so they derive.
+        price(t, 10, "wheat_seeds", "beetroot_seeds",
                 "torchflower_seeds", "pitcher_pod");
         price(t, 15, "wheat", "beetroot", "carrot", "potato", "melon_slice", "sweet_berries",
-                "glow_berries", "kelp", "seagrass", "sea_pickle", "lily_pad", "moss_carpet",
+                "glow_berries", "kelp", "seagrass", "sea_pickle", "lily_pad",
                 "big_dripleaf", "small_dripleaf", "hanging_roots", "spore_blossom");
         price(t, 25, "pumpkin", "melon", "cocoa_beans", "brown_mushroom", "red_mushroom",
                 "crimson_nylium", "warped_nylium", "chorus_fruit");
@@ -183,7 +188,7 @@ public final class DefaultPrices {
                 "slime_ball");
         price(t, 40, "leather", "honeycomb", "phantom_membrane", "armadillo_scute",
                 "turtle_scute");
-        price(t, 90, "blaze_rod", "ender_pearl", "magma_cream");
+        price(t, 90, "blaze_rod", "ender_pearl");
         price(t, 150, "ghast_tear", "rabbit_foot", "nautilus_shell", "breeze_rod");
         price(t, 400, "shulker_shell", "prismarine_shard", "prismarine_crystals");
 
@@ -208,9 +213,12 @@ public final class DefaultPrices {
         TomlTable t = table(doc, "nether",
                 "Nether-only materials beyond the ores above.");
 
-        price(t, 20, "netherrack", "nether_bricks", "soul_sand", "soul_soil");
-        price(t, 30, "basalt", "smooth_basalt", "blackstone", "warped_hyphae", "crimson_hyphae");
-        price(t, 12000, "netherite_scrap");
+        // nether_bricks is crafted from four nether brick items, so it derives.
+        price(t, 20, "netherrack", "soul_sand", "soul_soil");
+        price(t, 30, "basalt", "smooth_basalt", "blackstone");
+        // *_hyphae is crafted from four stems into three, so it derives ABOVE a stem.
+        // Declaring it below one dragged crimson planks to 8 and sticks to 4.
+        // netherite_scrap is smelted from ancient debris, so the solver prices it.
     }
 
     private static void end(TomlDocument doc) {
@@ -219,20 +227,20 @@ public final class DefaultPrices {
 
         price(t, 15, "end_stone");
         price(t, 60, "chorus_flower");
-        price(t, 800, "purpur_block");
+        // purpur_block is crafted from popped chorus fruit.
         price(t, 2000, "dragon_breath");
         price(t, 25000, "elytra");
         price(t, 50000, "nether_star");
         price(t, 100000, "dragon_egg");
-        price(t, 8000, "end_crystal");
+        // end_crystal is crafted from glass, an eye of ender and a ghast tear.
     }
 
     private static void ocean(TomlDocument doc) {
         TomlTable t = table(doc, "ocean",
                 "Underwater structures and their drops.");
 
-        price(t, 60, "prismarine", "prismarine_bricks", "dark_prismarine", "sponge",
-                "wet_sponge", "tube_coral", "brain_coral", "bubble_coral", "fire_coral",
+        // The prismarine blocks are crafted from shards and crystals, so they derive.
+        price(t, 60, "sponge", "wet_sponge", "tube_coral", "brain_coral", "bubble_coral", "fire_coral",
                 "horn_coral", "tube_coral_block", "brain_coral_block", "bubble_coral_block",
                 "fire_coral_block", "horn_coral_block");
         price(t, 4000, "heart_of_the_sea");
@@ -249,7 +257,7 @@ public final class DefaultPrices {
                 "more than the effort they save.");
 
         price(t, 800, "saddle", "name_tag");
-        price(t, 1200, "lead");
+        // lead is crafted from string and a slime ball.
         price(t, 2000, "trident");
         price(t, 3000, "totem_of_undying");
         price(t, 1500, "enchanted_golden_apple");

@@ -293,6 +293,44 @@ default_recipe_multiplier = 1.3
 
 **Naming rationale:** `reload` re-reads files, `rebuild` recomputes derived data. The original `reset` was dropped because it reads as "wipe everyone's balances".
 
+
+#### M6/M7 outcome — verified at runtime, not just compiled
+
+Dev servers were booted on **Forge 1.20.1** and **Fabric 1.21.1**, exercising both
+`GameAdapter` variants and both platform implementations against real Minecraft:
+
+| | Forge 1.20.1 | Fabric 1.21.1 |
+|---|---|---|
+| Declarations loaded | 311 | 339 |
+| Advancements priced | 1271 | 1399 |
+| Items priced | 946 from 1163 recipes | 975 from 1279 recipes |
+| Solve time | 9 ms, 4 passes | 13 ms, 6 passes |
+| Arbitrage violations | 0 | 0 |
+| Anchor chain | log 40 → plank 10 → stick 5 | identical |
+
+The declaration and advancement counts differing per version is correct: the shipped
+price file spans several Minecraft versions, and 1.20.1 genuinely has fewer of both.
+
+**The arbitrage validator paid for itself immediately.** The first boot reported 8
+profitable recipes, every one a mistake in the hand-authored price table — and every one
+the same mistake: pricing an item that is actually *craftable*, violating the file's own
+"roots only" rule. `end_crystal` declared at 8000 could be crafted for 334 and sold for
+6000. Three more surfaced the same way during verification, including two that silently
+broke the anchor:
+
+- `oak_wood` declared at 35, below a log — the planks recipe takes the whole `#logs` tag
+  and picks its cheapest member, dragging planks to 9 and sticks to 4
+- `crimson_hyphae` declared at 30, below its stem — same mechanism, crimson planks to 8
+
+Both derive correctly now (hyphae 54, above the stem, since four stems make three).
+That is the "cheapest ingredient alternative wins" rule working exactly as designed and
+exposing bad input, rather than a solver bug.
+
+**Three build fixes came out of running rather than compiling:** ModDevGradle creates no
+run tasks of its own, only puts a source set on the dev mod path when it is declared in
+`mods { }`, and needs `:core` on `additionalRuntimeClasspath` because dev runs load the
+classes directory rather than the merged jar. None of these is visible to `./gradlew build`.
+
 ### M8 — Networking & client cache
 - [ ] 8.1 Packet abstraction over the `FriendlyByteBuf` ↔ `CustomPacketPayload` split
 - [ ] 8.2 S2C price table: compressed, content-hashed, disk-cached client-side; C2S hash check on join returns unchanged/delta/full

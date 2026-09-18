@@ -33,6 +33,26 @@ legacyForge {
         minecraftVersion = property("deps.parchment_mc") as String
         mappingsVersion = property("deps.parchment") as String
     }
+
+    // Without this the mod is invisible in dev runs: ModDevGradle only puts a source
+    // set on the mod path when it is declared as a mod here.
+    mods {
+        create(property("mod_id") as String) {
+            sourceSet(sourceSets.main.get())
+        }
+    }
+
+    // ModDevGradle does not create run tasks on its own, unlike Loom.
+    runs {
+        create("client") {
+            client()
+            gameDirectory = file("run")
+        }
+        create("server") {
+            server()
+            gameDirectory = file("run")
+        }
+    }
 }
 
 sourceSets.main {
@@ -53,6 +73,7 @@ sourceSets.main {
     if (versioned.isDirectory) {
         java.srcDir(versioned)
     }
+
 }
 
 repositories {
@@ -64,6 +85,11 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
+
+    // Dev runs load the compiled classes directory rather than the jar, so :core is not
+    // merged in yet at that point. Without this the mod loads and then dies on a
+    // ClassNotFoundException the moment it reads its config.
+    "additionalRuntimeClasspath"(project(":core"))
 }
 
 // :core is plain Java with no Minecraft dependency, so its classes are merged into
