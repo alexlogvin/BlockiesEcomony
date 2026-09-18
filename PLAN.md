@@ -136,14 +136,33 @@ audience in the meantime.
 **Shipping matrix after M1: 5 jars** — 1.20.1 fabric/forge/quilt, 1.21.1 fabric/neoforge.
 
 ### M2 — `core`: pure-Java foundation (no Minecraft)
-- [ ] 2.1 Minimal TOML reader/writer with **comment preservation** — tables, string/int/bool/float, arrays, inline comments. Round-trip tested.
-- [ ] 2.2 Config schema objects + defaults + a commented-emit path so generated files are self-documenting
-- [ ] 2.3 `Money` — `long` arithmetic, overflow-safe add/subtract, **micro-unit internal precision with rounding only at the edge**, smart formatting (`3.0K B`, `1.2M B`) and full form. **Suffixes and decimal separator come from translation keys**, not hardcoded, so `uk_ua` can render `тис.`/`млн`
-- [ ] 2.4 `PriceGraph` / `PriceSolver` over abstract `RecipeView` + `IngredientView` interfaces (no MC types): cheapest-recipe, cheapest-alternative, divide-by-output, iterative cycle relaxation with a pass cap and convergence logging. Solves in micro-units so divide-by-output does not accumulate round-up error
-- [ ] 2.5 `Ledger` — balances by UUID, transaction validation, rate limiting, result types
-- [ ] 2.6 `AdvancementPrizeCalculator` — `base × exponent^depth`, per-tree and per-advancement overrides
-- [ ] 2.7 JUnit tests for solver (incl. the ingot↔nugget cycle), money formatting, TOML round-trip
+- [x] 2.1 Minimal TOML reader/writer with **comment preservation** — tables, string/int/bool/float, arrays, inline comments. Round-trip tested.
+- [x] 2.2 Config schema objects + defaults + a commented-emit path so generated files are self-documenting
+- [x] 2.3 `Money` — `long` arithmetic, overflow-safe add/subtract, **micro-unit internal precision with rounding only at the edge**, smart formatting (`3.0K B`, `1.2M B`) and full form. **Suffixes and decimal separator come from translation keys**, not hardcoded, so `uk_ua` can render `тис.`/`млн`
+- [x] 2.4 `PriceGraph` / `PriceSolver` over abstract `RecipeView` + `IngredientView` interfaces (no MC types): cheapest-recipe, cheapest-alternative, divide-by-output, iterative cycle relaxation with a pass cap and convergence logging. Solves in micro-units so divide-by-output does not accumulate round-up error
+- [x] 2.5 `Ledger` — balances by UUID, transaction validation, rate limiting, result types
+- [x] 2.6 `AdvancementPrizeCalculator` — `base × exponent^depth`, per-tree and per-advancement overrides
+- [x] 2.7 JUnit tests for solver (incl. the ingot↔nugget cycle), money formatting, TOML round-trip
 - **Checkpoint: `./gradlew :core:test` green. This milestone is fully testable without Minecraft.**
+
+
+#### M2 outcome (recorded after execution)
+
+**91 tests, all passing, with no Minecraft runtime involved.** `:core` compiles at Java 8
+bytecode and holds the solver, ledger, TOML, config schema and money formatting.
+
+Two design points worth recording, both found by tests rather than by review:
+
+- **Per-output division rounds up.** Truncating it let a cycle shave micro-units each lap,
+  so `ingot -> 9 nuggets -> ingot` came out fractionally cheaper than smelting and won the
+  `min`. The displayed price was identical, but a round trip must never be able to reduce a
+  price at all. `ceilDiv` closes it.
+- **A recipe whose only input is its own output is skipped**, otherwise a repair-style
+  recipe pins its own value.
+
+Rounding rule, enforced and tested end to end: **buying rounds up, selling rounds down.**
+Together with the 1.3 default multiplier this makes every closed loop lossy — verified
+against a full vanilla-shaped chain including the iron block/unblock dupe loop.
 
 ### M3 — Platform SPI
 - [ ] 3.1 Define `Platform` interfaces in `/src/main/java`: config dir, mod-loaded query, environment, keybind registration, HUD render hook, command registration, advancement-earned hook, reload listener, networking, player inventory ops

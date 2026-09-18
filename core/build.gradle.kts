@@ -20,6 +20,8 @@ tasks.withType<JavaCompile>().configureEach {
     // so a stray Java 9+ method call fails here instead of at runtime on 1.12.2.
     options.release = 8
     options.encoding = "UTF-8"
+    // Targeting 8 is deliberate (see above), so silence the "obsolete target" notice.
+    options.compilerArgs.add("-Xlint:-options")
 }
 
 repositories { mavenCentral() }
