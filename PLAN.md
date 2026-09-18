@@ -214,8 +214,8 @@ prices.d/              drop-in add-ons, e.g. create.toml
 generated/prices.toml  machine-written, header says DO NOT EDIT
 ```
 
-- [ ] 4.1 Directory layout + first-run generation
-- [ ] 4.2 `server.toml`: sell multiplier, recipe-type multiplier table, starting balance, death penalty, advancement base/exponent, rate limits, transaction-log flag, admin permission level. Clamps invariant violations at startup with a loud warning. The multiplier block is shaped as:
+- [x] 4.1 Directory layout + first-run generation
+- [x] 4.2 `server.toml`: sell multiplier, recipe-type multiplier table, starting balance, death penalty, advancement base/exponent, rate limits, transaction-log flag, admin permission level. Clamps invariant violations at startup with a loud warning. The multiplier block is shaped as:
 
 ```toml
 # Recipe-type multipliers, applied to the sum of ingredient prices.
@@ -241,11 +241,11 @@ generated/prices.toml  machine-written, header says DO NOT EDIT
 # Applies to every recipe type not listed above, including modded ones.
 default_recipe_multiplier = 1.3
 ```
-- [ ] 4.3 `client.toml`: HUD anchor (9 positions), x/y offset, shown/hidden, cobblestone-icon toggle, favorites
-- [ ] 4.4 `prices.toml` — **roots only.** Hand-author the ~150–250 *non-craftable* vanilla items (raw ores, mob drops, logs, loot-only). Everything craftable is derived. Wide ~1:500 spread anchored at floor 5 / log 40 / diamond ~2500. Empty value `""` = blacklisted
-- [ ] 4.5 `advancements.toml` — separate from item prices; different editors, different cadence
-- [ ] 4.6 `whitelist.toml` — empty means no whitelist applies
-- [ ] 4.7 Migration-safe reload; validation errors go to the server log, never a crash
+- [x] 4.3 `client.toml`: HUD anchor (9 positions), x/y offset, shown/hidden, cobblestone-icon toggle, favorites
+- [x] 4.4 `prices.toml` — **roots only.** Hand-author the ~150–250 *non-craftable* vanilla items (raw ores, mob drops, logs, loot-only). Everything craftable is derived. Wide ~1:500 spread anchored at floor 5 / log 40 / diamond ~2500. Empty value `""` = blacklisted
+- [x] 4.5 `advancements.toml` — separate from item prices; different editors, different cadence
+- [x] 4.6 `whitelist.toml` — empty means no whitelist applies
+- [x] 4.7 Migration-safe reload; validation errors go to the server log, never a crash
 
 ### M5 — Price engine (Minecraft side)
 - [ ] 5.1 `RecipeView`/`IngredientView` adapters over the real `RecipeManager`, version-gated
