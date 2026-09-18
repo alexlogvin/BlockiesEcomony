@@ -248,13 +248,13 @@ default_recipe_multiplier = 1.3
 - [x] 4.7 Migration-safe reload; validation errors go to the server log, never a crash
 
 ### M5 — Price engine (Minecraft side)
-- [ ] 5.1 `RecipeView`/`IngredientView` adapters over the real `RecipeManager`, version-gated
-- [ ] 5.2 Datapack price source: reload listener reading `data/<ns>/blockies_economy/prices.json` from every pack and mod jar
-- [ ] 5.3 Java API surface (`BlockiesEconomyAPI`) + ServiceLoader entrypoint for mod-dev registrations
-- [ ] 5.4 Full build on `SERVER_STARTED` and on `/reload`, writing `generated/prices.toml` with a **schema version**; `/shop rebuild` recomputes. Runs **async** off the server thread, with trades rejected by a "prices not ready" guard until it finishes — a 10k-item modpack must not stall world load
-- [ ] 5.5 Precedence merge, blacklist/whitelist application, unpriced-item exclusion
-- [ ] 5.5b **Tag rules** — resolve `"#c:ingots" = 90` style entries against the item tag registry, ranked below the Java API and above recipe derivation. Log which tags matched how many items so admins can see the blast radius
-- [ ] 5.5c **Skip special/dynamic recipes** — any recipe with no resolvable ingredients or an empty result. Log the skip list so missing shop items are explainable
+- [x] 5.1 `RecipeView`/`IngredientView` adapters over the real `RecipeManager`, version-gated
+- [x] 5.2 Datapack price source: reload listener reading `data/<ns>/blockies_economy/prices.json` from every pack and mod jar
+- [x] 5.3 Java API surface (`BlockiesEconomyAPI`) + ServiceLoader entrypoint for mod-dev registrations
+- [x] 5.4 Full build on `SERVER_STARTED` and on `/reload`, writing `generated/prices.toml` with a **schema version**; `/shop rebuild` recomputes. Runs **async** off the server thread, with trades rejected by a "prices not ready" guard until it finishes — a 10k-item modpack must not stall world load
+- [x] 5.5 Precedence merge, blacklist/whitelist application, unpriced-item exclusion
+- [x] 5.5b **Tag rules** — resolve `"#c:ingots" = 90` style entries against the item tag registry, ranked below the Java API and above recipe derivation. Log which tags matched how many items so admins can see the blast radius
+- [x] 5.5c **Skip special/dynamic recipes** — any recipe with no resolvable ingredients or an empty result. Log the skip list so missing shop items are explainable
 - [ ] 5.6 **Arbitrage validation pass** — after solving, assert `sum(output_sell) ≤ sum(input_buy)` for every recipe; log every violation with the offending recipe id, and optionally auto-correct
 - [ ] 5.7 **Authoring tools (pulled forward from the backlog — needed to do M4.4 at all):** CSV export of the full derived table, and `/shop debug price <item>` dumping the derivation path that produced a price
 - **Risk flagged:** reload-listener ordering relative to vanilla's `RecipeManager` is a classic silent-empty-graph bug. Explicitly assert the recipe manager is populated before solving, and log the priced-item count.

@@ -42,6 +42,12 @@ sourceSets.main {
     // Per-Minecraft-version loader code, for the few classes that genuinely fork
     // between versions (a Mixin whose target signature changed, say). Preferred over
     // Stonecutter comment gates when a whole class differs rather than a line.
+    // Shared code that forks by Minecraft version, e.g. the recipe adapter.
+    val sharedVersioned = rootProject.file("src/main-${mcVersion}/java")
+    if (sharedVersioned.isDirectory) {
+        java.srcDir(sharedVersioned)
+    }
+
     val versioned = rootProject.file("src/fabric-${mcVersion}/java")
     if (versioned.isDirectory) {
         java.srcDir(versioned)
