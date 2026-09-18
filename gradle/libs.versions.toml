@@ -1,0 +1,33 @@
+# Version catalogue — build plugins and shared libraries only.
+#
+# Per-Minecraft-version values (Fabric API, NeoForge, Forge, Parchment, Java level)
+# do NOT live here. They belong in each Stonecutter node's own gradle.properties,
+# because they differ per node. See versions/<mc>/gradle.properties.
+#
+# All versions below were resolved live against their Maven repositories on 2026-09-18.
+
+[versions]
+# --- Build plugins ---
+stonecutter = "0.9.8"        # multiversion preprocessor + project generator
+fabric-loom = "1.18.2"       # Fabric / Quilt toolchain
+moddevgradle = "2.0.147"     # NeoForge toolchain; also provides the legacyforge variant for Forge 1.20.1
+foojay = "1.0.0"             # JDK auto-provisioning for toolchains + daemon JVM criteria
+
+# --- Loaders (version-independent) ---
+fabric-loader = "0.19.5"
+quilt-loader = "0.31.0-beta.4"
+
+# --- Test ---
+junit = "5.11.4"
+
+[plugins]
+stonecutter = { id = "dev.kikugie.stonecutter", version.ref = "stonecutter" }
+fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
+moddev-neoforge = { id = "net.neoforged.moddev", version.ref = "moddevgradle" }
+moddev-legacyforge = { id = "net.neoforged.moddev.legacyforge", version.ref = "moddevgradle" }
+foojay = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "foojay" }
+
+[libraries]
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }

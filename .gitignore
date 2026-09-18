@@ -1,0 +1,64 @@
+# --- Gradle ---
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!src/**/build/
+out/
+classes/
+
+# --- Stonecutter ---
+# The active-version marker is machine-local state, not shared config.
+.stonecutter/
+versions/**/build/
+
+# --- Minecraft / mod loader dev runtimes ---
+run/
+runs/
+run-data/
+logs/
+crash-reports/
+*.log
+.architectury-transformer/
+remappedSrc/
+.fabric/
+.neoforge/
+.forge/
+
+# Loom / ModDevGradle caches
+.loom-cache/
+.gradle-loom/
+
+# --- IDE: IntelliJ IDEA ---
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# --- IDE: Eclipse ---
+.classpath
+.project
+.settings/
+bin/
+eclipse/
+
+# --- IDE: VS Code ---
+.vscode/
+.factorypath
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Release output ---
+build/release/
+
+# --- Secrets ---
+# Publishing tokens belong in CI secrets, never in the repo.
+.env
+*.local.properties
+secrets.properties
+
+# Stonecutter writes the active-node marker into the controller script; the
+# generated per-node build dirs are covered by build/ above.
+versions/*/build/

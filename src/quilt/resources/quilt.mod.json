@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "${mod_group}",
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "metadata": {
+      "name": "${mod_name}",
+      "description": "${mod_description}",
+      "contributors": { "${mod_author}": "Author" },
+      "contact": {
+        "homepage": "${mod_homepage}",
+        "sources": "${mod_sources}",
+        "issues": "${mod_issues}"
+      },
+      "license": "${mod_license}",
+      "icon": "assets/${mod_id}/icon.png"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "entrypoints": {
+      "init": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabric"]
+    },
+    "depends": [
+      { "id": "quilt_loader", "versions": ">=0.20.0" },
+      { "id": "minecraft", "versions": "${mc_version_range}" },
+      { "id": "fabric-api", "optional": false }
+    ]
+  }
+}
