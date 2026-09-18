@@ -96,10 +96,11 @@ public final class EconomyServer {
         BalancePersistence.markDirty(stopping, economy.ledger(), awarded);
         this.server = null;
 
-        // Drop the world's state now rather than waiting for the next world to clear it,
-        // so an idle client is not holding another world's balances in memory.
-        economy.ledger().clear();
-        awarded.clear();
+        // Deliberately NOT cleared here. markDirty only sets a flag - the actual write
+        // happens later, during the world save - so emptying the ledger at this point
+        // destroys the data moments before it is written, and every session starts at 0.
+        // Clearing at the START of onServerStarted is what isolates one world from the
+        // next, and it holds even when a server dies without ever reaching this method.
     }
 
     /**

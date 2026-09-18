@@ -115,6 +115,8 @@ public final class BalancePersistence {
             }
             tag.put(AWARDED_KEY, history);
 
+            BlockiesEconomy.LOGGER.debug("Wrote {} player balances to the world save.",
+                    balances.size());
             return tag;
         }
     }
