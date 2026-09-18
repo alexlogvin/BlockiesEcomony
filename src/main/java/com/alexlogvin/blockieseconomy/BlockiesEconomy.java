@@ -1,5 +1,7 @@
 package com.alexlogvin.blockieseconomy;
 
+import com.alexlogvin.blockieseconomy.platform.ServerEvents;
+import com.alexlogvin.blockieseconomy.platform.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +19,21 @@ public final class BlockiesEconomy {
     /** SLF4J ships with Minecraft itself, so this needs no loader-specific logger. */
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
+    private static EconomyServer economyServer;
+
     private BlockiesEconomy() {
     }
 
     public static void init() {
-        // M5 onward wires the price engine, ledger and commands here.
+        if (economyServer != null) {
+            return;
+        }
+        economyServer = new EconomyServer();
+        economyServer.register(Services.load(ServerEvents.class));
+    }
+
+    /** The running server-side state, or null before {@link #init()}. */
+    public static EconomyServer server() {
+        return economyServer;
     }
 }

@@ -251,20 +251,20 @@ default_recipe_multiplier = 1.3
 - [x] 5.1 `RecipeView`/`IngredientView` adapters over the real `RecipeManager`, version-gated
 - [ ] 5.2 Datapack price source: reload listener reading `data/<ns>/blockies_economy/prices.json` from every pack and mod jar
 - [ ] 5.3 Java API surface (`BlockiesEconomyAPI`) + ServiceLoader entrypoint for mod-dev registrations
-- [ ] 5.4 Full build — engine written; not yet wired to the lifecycle events, and generated/prices.toml is not written yet on `SERVER_STARTED` and on `/reload`, writing `generated/prices.toml` with a **schema version**; `/shop rebuild` recomputes. Runs **async** off the server thread, with trades rejected by a "prices not ready" guard until it finishes — a 10k-item modpack must not stall world load
+- [x] 5.4 Full build on server start and datapack reload, writing generated/prices.toml with a schema version; /shop rebuild recomputes. Runs async with a "prices not ready" guard on `SERVER_STARTED` and on `/reload`, writing `generated/prices.toml` with a **schema version**; `/shop rebuild` recomputes. Runs **async** off the server thread, with trades rejected by a "prices not ready" guard until it finishes — a 10k-item modpack must not stall world load
 - [x] 5.5 Precedence merge, blacklist/whitelist application, unpriced-item exclusion
 - [x] 5.5b **Tag rules** — resolve `"#c:ingots" = 90` style entries against the item tag registry, ranked below the Java API and above recipe derivation. Log which tags matched how many items so admins can see the blast radius
 - [x] 5.5c **Skip special/dynamic recipes** — any recipe with no resolvable ingredients or an empty result. Log the skip list so missing shop items are explainable
-- [ ] 5.6 **Arbitrage validation pass** — after solving, assert `sum(output_sell) ≤ sum(input_buy)` for every recipe; log every violation with the offending recipe id, and optionally auto-correct
-- [ ] 5.7 **Authoring tools (pulled forward from the backlog — needed to do M4.4 at all):** CSV export of the full derived table, and `/shop debug price <item>` dumping the derivation path that produced a price
+- [x] 5.6 **Arbitrage validation pass** — after solving, assert `sum(output_sell) ≤ sum(input_buy)` for every recipe; log every violation with the offending recipe id, and optionally auto-correct
+- [x] 5.7 **Authoring tools (pulled forward from the backlog — needed to do M4.4 at all):** CSV export of the full derived table, and `/shop debug price <item>` dumping the derivation path that produced a price
 - **Risk flagged:** reload-listener ordering relative to vanilla's `RecipeManager` is a classic silent-empty-graph bug. Explicitly assert the recipe manager is populated before solving, and log the priced-item count.
 
 ### M6 — Balances & transactions
-- [ ] 6.1 `SavedData` on `server.overworld()` keyed by player UUID (never per-dimension), version-gated for the 1.20.1 factory difference
-- [ ] 6.2 Buy: validate server-side, debit, deliver — **overflow items drop at the player's feet**
-- [ ] 6.3 Sell: validate ownership, durability-prorated pricing, and **refuse any stack with non-default components** — enchantments, potion contents, custom names, written books, and above all **containers with contents** (shulker boxes, bundles), which would otherwise sell at empty-container price
-- [ ] 6.4 Rate limiting (per-player + global), rotating transaction log (off by default)
-- [ ] 6.5 Death penalty hook (default 0)
+- [x] 6.1 `SavedData` on `server.overworld()` keyed by player UUID (never per-dimension), version-gated for the 1.20.1 factory difference
+- [x] 6.2 Buy: validate server-side, debit, deliver — **overflow items drop at the player's feet**
+- [x] 6.3 Sell: validate ownership, durability-prorated pricing, and **refuse any stack with non-default components** — enchantments, potion contents, custom names, written books, and above all **containers with contents** (shulker boxes, bundles), which would otherwise sell at empty-container price
+- [x] 6.4 Rate limiting (per-player + global), rotating transaction log (off by default)
+- [x] 6.5 Death penalty hook (default 0)
 - **All transactions are server-authoritative. The client never computes a balance it is trusted on.**
 
 ### M7 — Commands
@@ -285,11 +285,11 @@ default_recipe_multiplier = 1.3
 | `/shop reload` | OP 2 | re-read config files without restarting |
 | `/shop debug price <item>` | OP 2 | dump the derivation path that produced a price |
 
-- [ ] 7.1 Player commands (`/shop`, `ui`, `balance`, `buy`, `sell`, `price`, `top`)
-- [ ] 7.2 Admin commands (`balance <player> [set|add|remove]`, `price <item> <price>`, `rebuild`, `reload`, `debug price`)
-- [ ] 7.3 Offline player resolution via the server usercache; confirmation flow for large balance edits
-- [ ] 7.4 Item argument via `ResourceArgument`/`ResourceLocationArgument` with a suggestion provider limited to **priced** items — avoids the 1.20.1↔1.21 `ItemInput`/`DataComponentPatch` divergence entirely
-- [ ] 7.5 All output via translation keys
+- [x] 7.1 Player commands (`/shop`, `ui`, `balance`, `buy`, `sell`, `price`, `top`)
+- [x] 7.2 Admin commands (`balance <player> [set|add|remove]`, `price <item> <price>`, `rebuild`, `reload`, `debug price`)
+- [x] 7.3 Offline player resolution via the server usercache; confirmation flow for large balance edits
+- [x] 7.4 Item argument via `ResourceArgument`/`ResourceLocationArgument` with a suggestion provider limited to **priced** items — avoids the 1.20.1↔1.21 `ItemInput`/`DataComponentPatch` divergence entirely
+- [x] 7.5 All output via translation keys
 
 **Naming rationale:** `reload` re-reads files, `rebuild` recomputes derived data. The original `reset` was dropped because it reads as "wipe everyone's balances".
 
@@ -315,9 +315,9 @@ default_recipe_multiplier = 1.3
 - [ ] 10.8 Performance: precomputed filtered/sorted index, no per-frame allocation in the grid loop
 
 ### M11 — Advancements
-- [ ] 11.1 Walk the advancement tree at startup — `Advancement#getParent/getChildren` on 1.20.1 vs `AdvancementTree`/`AdvancementNode` on 1.21.1 — and compute `base × 1.5^depth` per node
-- [ ] 11.2 Write computed prizes into `generated/prices.toml`; honour per-advancement overrides from `advancements.toml`
-- [ ] 11.3 Award on earn via the platform hook; one-shot guard so re-granting never double-pays
+- [x] 11.1 Walk the advancement tree at startup — `Advancement#getParent/getChildren` on 1.20.1 vs `AdvancementTree`/`AdvancementNode` on 1.21.1 — and compute `base × 1.5^depth` per node
+- [x] 11.2 Write computed prizes into `generated/prices.toml`; honour per-advancement overrides from `advancements.toml`
+- [x] 11.3 Award on earn via the platform hook; one-shot guard so re-granting never double-pays
 
 ### M12 — Recipe-viewer integration (all compileOnly, never required)
 - [ ] 12.1 Abstract `RecipeViewerBridge` with the capability ladder: **buttons → open Shop UI at item → price display only → skip**
@@ -326,8 +326,8 @@ default_recipe_multiplier = 1.3
 - [ ] 12.4 REI — experimental `registerExtension`/`getView` → tier 2 (open Shop UI); degrade to tier 3 if the experimental API is unusable
 
 ### M13 — Localisation
-- [ ] 13.1 Every user-facing string as a translation key
-- [ ] 13.2 `en_us.json`, `uk_ua.json`
+- [x] 13.1 Every user-facing string as a translation key
+- [x] 13.2 `en_us.json`, `uk_ua.json`
 
 ### M14 — Release tooling
 - [ ] 14.1 `scripts/build-release.ps1` + `.sh` taking version and optional loader/MC filters, emitting `build/release/<modversion>/`
@@ -344,7 +344,17 @@ default_recipe_multiplier = 1.3
 ### M16 — Expansion (post-v1)
 - [ ] 16.1 Add node `1.21.11`
 - [ ] 16.2 Add node `26.3` — Java 25, unobfuscated, **no `remapJar`**; NeoForge 26.3 is beta-only and Forge has no 26.3 build at all
-- [ ] 16.3 Forge on 1.21.x (now possible — this was an Architectury limit, not a Minecraft one)
+- [ ] 16.3 **Forge on 1.21.x — deferred by decision, not blocked forever.** ModDevGradle 2.0.147 cannot
+  build post-1.20.1 Forge: its NeoFormRuntime resolves only from NeoForged Maven and the local
+  `.m2`, never learns `maven.minecraftforge.net`, and does not declare `forge:universal-srg` or
+  `mcp_config`, both of which Forge 52.x requires. Injecting them into the NFRT configurations
+  breaks manifest evaluation instead. Three routes when this is picked up:
+  1. Wait for ModDevGradle to support it upstream (cheapest; check its changelog first)
+  2. ForgeGradle 6 in an **isolated included build**, so its plugin classpath never meets Loom
+  3. A hand-rolled Forge module consuming `:core` plus a native platform adapter
+  NeoForge covers the 1.21.1 Forge-side audience meanwhile, and the ecosystem has largely moved
+  there. The `build-forge.gradle.kts` script already handles 1.21+ Java levels, so only the
+  toolchain gap stands in the way.
 - [ ] 16.4 Legacy era tree 1.12.2–1.19.4: separate Gradle build, Java 8/17, ForgeGradle + Loom, consuming the same `core`
 - **Warning:** 1.21.2 is a violent API break (recipes become a datapack registry, `getResultItem` removed, `Ingredient` becomes `HolderSet`-based, and only placeable recipes sync to clients). Budget real work for the 1.21.1 → 1.21.11 step.
 
