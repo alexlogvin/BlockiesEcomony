@@ -17,6 +17,9 @@
       "icon": "assets/${mod_id}/icon.png"
     },
     "intermediate_mappings": "net.fabricmc:intermediary",
+    "mixins": [
+      "blockies_economy.mixins.json"
+    ],
     "entrypoints": {
       "init": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabric"]
     },

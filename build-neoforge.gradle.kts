@@ -32,8 +32,17 @@ neoForge {
 }
 
 sourceSets.main {
+    // Shared loader code.
     java.srcDir(rootProject.file("src/$loader/java"))
     resources.srcDir(rootProject.file("src/$loader/resources"))
+
+    // Per-Minecraft-version loader code, for the few classes that genuinely fork
+    // between versions (a Mixin whose target signature changed, say). Preferred over
+    // Stonecutter comment gates when a whole class differs rather than a line.
+    val versioned = rootProject.file("src/$loader-${mcVersion}/java")
+    if (versioned.isDirectory) {
+        java.srcDir(versioned)
+    }
 }
 
 repositories {

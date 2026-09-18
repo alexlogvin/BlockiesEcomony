@@ -13,6 +13,9 @@
   "license": "${mod_license}",
   "icon": "assets/${mod_id}/icon.png",
   "environment": "*",
+  "mixins": [
+    "blockies_economy.mixins.json"
+  ],
   "entrypoints": {
     "main": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabric"]
   },

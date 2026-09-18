@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.alexlogvin.blockieseconomy.fabric.mixin",
+  "compatibilityLevel": "JAVA_${java_level}",
+  "mixins": [
+    "PlayerAdvancementsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

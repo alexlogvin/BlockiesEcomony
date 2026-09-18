@@ -27,10 +27,25 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+// Compiling src/fabric against Quilt Loader emits deprecation warnings for
+// net.fabricmc.api.ModInitializer and FabricLoader. That is expected and correct to
+// ignore: Quilt marks its Fabric compatibility layer deprecated in favour of its own
+// API, but Quilt Standard Libraries and Quilted Fabric API were retired in Dec 2025,
+// so there is no Quilt-native target left. The compatibility layer is the supported
+// path for a Quilt build now. Do not "fix" these by switching to org.quiltmc APIs.
+
 sourceSets.main {
-    // Reuses the Fabric platform implementation wholesale.
+    // Shared loader code.
     java.srcDir(rootProject.file("src/fabric/java"))
     resources.srcDir(rootProject.file("src/quilt/resources"))
+
+    // Per-Minecraft-version loader code, for the few classes that genuinely fork
+    // between versions (a Mixin whose target signature changed, say). Preferred over
+    // Stonecutter comment gates when a whole class differs rather than a line.
+    val versioned = rootProject.file("src/fabric-${mcVersion}/java")
+    if (versioned.isDirectory) {
+        java.srcDir(versioned)
+    }
 }
 
 repositories {
@@ -47,7 +62,10 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${property("deps.parchment_mc")}:${property("deps.parchment")}@zip")
     })
 
-    modImplementation("org.quiltmc:quilt-loader:${property("deps.quilt_loader")}")
+    // Compiles against Fabric Loader; Quilt Loader runs it through its compatibility
+    // layer. quilt.mod.json declares the Quilt Loader requirement instead. Quilt has
+    // published no Mixin artifact of its own since QSL was retired.
+    modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
 
     implementation(project(":core"))
@@ -94,7 +112,8 @@ val metadataProps = mapOf(
 
 tasks.processResources {
     inputs.properties(metadataProps)
-    filesMatching(listOf("fabric.mod.json", "quilt.mod.json", "pack.mcmeta")) {
+    filesMatching(listOf("fabric.mod.json", "quilt.mod.json", "pack.mcmeta",
+            "blockies_economy.mixins.json")) {
         expand(metadataProps)
     }
 }

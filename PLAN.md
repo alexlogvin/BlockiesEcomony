@@ -165,17 +165,43 @@ Together with the 1.3 default multiplier this makes every closed loop lossy — 
 against a full vanilla-shaped chain including the iron block/unblock dupe loop.
 
 ### M3 — Platform SPI
-- [ ] 3.1 Define `Platform` interfaces in `/src/main/java`: config dir, mod-loaded query, environment, keybind registration, HUD render hook, command registration, advancement-earned hook, reload listener, networking, player inventory ops
-- [ ] 3.2 `Services.load(...)` ServiceLoader resolver + `META-INF/services` entries per loader
-- [ ] 3.3 Fabric impl (Fabric API: `CommandRegistrationCallback`, `KeyBindingHelper`, `HudRenderCallback`, `ServerLifecycleEvents`, networking) + **Mixin on `PlayerAdvancements#award`** — Fabric API has no advancement event
-- [ ] 3.4 NeoForge impl (`RegisterCommandsEvent`, `RegisterKeyMappingsEvent`, `RenderGuiLayerEvent`, `AdvancementEvent.AdvancementEarnedEvent`, `AddReloadListenerEvent`)
-- [ ] 3.5 Forge 1.20.1 impl (same shapes, `AdvancementEvent.AdvancementEarnEvent`)
-- [ ] 3.6 Quilt impl — Fabric impl reused, `quilt.mod.json` only
-- [ ] 3.7 Version gates for the known 1.20.1↔1.21.1 deltas, isolated to single lines where possible:
+- [x] 3.1 Define `Platform` interfaces in `/src/main/java`: config dir, mod-loaded query, environment, keybind registration, HUD render hook, command registration, advancement-earned hook, reload listener, networking, player inventory ops
+- [x] 3.2 `Services.load(...)` ServiceLoader resolver + `META-INF/services` entries per loader
+- [x] 3.3 Fabric impl (Fabric API: `CommandRegistrationCallback`, `KeyBindingHelper`, `HudRenderCallback`, `ServerLifecycleEvents`, networking) + **Mixin on `PlayerAdvancements#award`** — Fabric API has no advancement event
+- [x] 3.4 NeoForge impl (`RegisterCommandsEvent`, `RegisterKeyMappingsEvent`, `RenderGuiLayerEvent`, `AdvancementEvent.AdvancementEarnedEvent`, `AddReloadListenerEvent`)
+- [x] 3.5 Forge 1.20.1 impl (same shapes, `AdvancementEvent.AdvancementEarnEvent`)
+- [x] 3.6 Quilt impl — Fabric impl reused, `quilt.mod.json` only
+- [x] 3.7 Version gates for the known 1.20.1↔1.21.1 deltas, isolated to single lines where possible:
   - HUD: `renderHud(GuiGraphics, float)` vs `Gui#render(GuiGraphics, DeltaTracker)`
   - Recipes: `Recipe#getId()` vs `RecipeHolder<T>` record; `getResultItem(RegistryAccess)` vs `(HolderLookup.Provider)`
   - SavedData: `save(CompoundTag)` vs `save(CompoundTag, HolderLookup.Provider)`; `SavedData.Factory` exists only 1.20.5+
   - Networking: raw `FriendlyByteBuf` + `ResourceLocation` vs `CustomPacketPayload` + `StreamCodec`
+
+
+#### M3 outcome (recorded after execution)
+
+Server-side SPI complete and compiling against every loader's real API:
+`Platform` (config dir, mod queries, environment, version) and `ServerEvents`
+(lifecycle, datapack reload, join/leave/death, advancements, commands), resolved
+via `ServiceLoader` with one provider per loader jar.
+
+**Advancements needed a Mixin on Fabric** — Fabric API has no event for them. Its target
+signature changed between versions (`award(Advancement, String)` on 1.20.1,
+`award(AdvancementHolder, String)` on 1.21.1), so rather than gate it with Stonecutter
+comments the build gained **per-Minecraft-version loader source dirs**: `src/<loader>-<mc>/java`,
+added to the source set only when present. Verified in the jars — 1.20.1 ships the
+`Advancement` variant at `JAVA_17`, 1.21.1 the `AdvancementHolder` variant at `JAVA_21`.
+Stonecutter comment gates remain the tool for line-level differences; this is for whole
+classes that fork.
+
+**Quilt compiles against Fabric Loader, not Quilt Loader.** Quilt publishes no Mixin
+artifact of its own and QSL/QFAPI were retired, so a Quilt build is a Fabric-shaped mod
+carrying `quilt.mod.json`. Deprecation warnings from Quilt's Fabric compatibility layer
+are expected and documented in `build-quilt.gradle.kts`.
+
+**Deferred by design:** the client-side SPI — keybinds, HUD render hook, networking and
+inventory operations — lands with M8/M9/M10, where it can be written against real usage
+rather than guessed at in the abstract.
 
 ### M4 — Config files
 
