@@ -25,9 +25,9 @@
 
   "blockies_economy.command.balance.self": "У вас %s Блокі (%s).",
   "blockies_economy.command.balance.other": "У гравця %s — %s Блокі (%s).",
-  "blockies_economy.command.balance.set": "Баланс гравця %s встановлено на %s Блокі (було %s).",
-  "blockies_economy.command.balance.added": "Гравцеві %s видано %s Блокі. Новий баланс: %s.",
-  "blockies_economy.command.balance.removed": "У гравця %s забрано %s Блокі. Новий баланс: %s.",
+  "blockies_economy.command.balance.set": "Баланс гравця %1$s встановлено на %2$s Блокі.",
+  "blockies_economy.command.balance.added": "Гравцеві %1$s видано %2$s Блокі. Новий баланс: %3$s.",
+  "blockies_economy.command.balance.removed": "У гравця %1$s забрано %2$s Блокі. Новий баланс: %3$s.",
   "blockies_economy.command.balance.confirm": "%s — це велика зміна балансу гравця %s. Поріг підтвердження: %s. Повторіть команду з «confirm» у кінці, якщо ви справді цього хочете.",
 
   "blockies_economy.command.buy.success": "Куплено %sx %s за %s Блокі. Баланс: %s.",

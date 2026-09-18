@@ -22,6 +22,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,11 +31,15 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The {@code /shop} command tree.
  *
- * <p>Item arguments are plain strings with a suggestion provider rather than Minecraft's
- * {@code ItemArgument}. That avoids the 1.20.1/1.21 split where {@code ItemInput} moved
- * from NBT to a {@code DataComponentPatch}, and it lets suggestions be limited to items
- * that actually have a price — suggesting the whole item registry when most of it is not
- * for sale would be worse than useless.
+ * <p>Item arguments use {@code ResourceLocationArgument} rather than {@code ItemArgument}.
+ * That avoids the 1.20.1/1.21 split where {@code ItemInput} moved from NBT to a
+ * {@code DataComponentPatch}, and it lets suggestions be limited to items that actually
+ * have a price — suggesting the whole item registry when most of it is not for sale would
+ * be worse than useless.
+ *
+ * <p>A plain string argument does NOT work here: Brigadier only accepts
+ * {@code [a-zA-Z0-9_.+-]} in an unquoted token, so typing the colon in
+ * {@code minecraft:diamond} failed with "expected whitespace to end one argument".
  */
 public final class ShopCommand {
 
@@ -61,7 +66,7 @@ public final class ShopCommand {
                         .then(balanceOperation("remove", economy, adminLevel))));
 
         root.then(Commands.literal("buy")
-                .then(Commands.argument("item", StringArgumentType.string())
+                .then(Commands.argument("item", ResourceLocationArgument.id())
                         .suggests(pricedItemSuggestions(economy))
                         .executes(ctx -> buy(ctx, economy, 1))
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
@@ -70,7 +75,7 @@ public final class ShopCommand {
 
         root.then(Commands.literal("sell")
                 .executes(ctx -> sellHeld(ctx, economy, 1))
-                .then(Commands.argument("item", StringArgumentType.string())
+                .then(Commands.argument("item", ResourceLocationArgument.id())
                         .suggests(pricedItemSuggestions(economy))
                         .executes(ctx -> sell(ctx, economy, 1))
                         .then(Commands.argument("count", IntegerArgumentType.integer(1))
@@ -78,7 +83,7 @@ public final class ShopCommand {
                                         IntegerArgumentType.getInteger(ctx, "count"))))));
 
         root.then(Commands.literal("price")
-                .then(Commands.argument("item", StringArgumentType.string())
+                .then(Commands.argument("item", ResourceLocationArgument.id())
                         .suggests(pricedItemSuggestions(economy))
                         .executes(ctx -> showPrice(ctx, economy))
                         .then(Commands.argument("price", LongArgumentType.longArg(0))
@@ -108,7 +113,7 @@ public final class ShopCommand {
                 .requires(source -> source.hasPermission(adminLevel))
                 .then(Commands.literal("export").executes(ctx -> exportCsv(ctx, economy)))
                 .then(Commands.literal("price")
-                        .then(Commands.argument("item", StringArgumentType.string())
+                        .then(Commands.argument("item", ResourceLocationArgument.id())
                                 .suggests(pricedItemSuggestions(economy))
                                 .executes(ctx -> debugPrice(ctx, economy)))));
 
@@ -277,7 +282,7 @@ public final class ShopCommand {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_PLAYERS_ONLY));
             return 0;
         }
-        String itemId = StringArgumentType.getString(ctx, "item");
+        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
         return report(ctx, economy.economy().buy(player, itemId, amount), true);
     }
 
@@ -288,7 +293,7 @@ public final class ShopCommand {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_PLAYERS_ONLY));
             return 0;
         }
-        String itemId = StringArgumentType.getString(ctx, "item");
+        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
         return report(ctx, economy.economy().sell(player, itemId, count), false);
     }
 
@@ -364,7 +369,7 @@ public final class ShopCommand {
 
     private static int showPrice(CommandContext<CommandSourceStack> ctx,
                                  EconomyServer economy) {
-        String itemId = StringArgumentType.getString(ctx, "item");
+        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
         if (!economy.prices().isReady()) {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_NOT_READY));
             return 0;
@@ -385,7 +390,7 @@ public final class ShopCommand {
 
     private static int setPrice(CommandContext<CommandSourceStack> ctx,
                                 EconomyServer economy) {
-        String itemId = StringArgumentType.getString(ctx, "item");
+        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
         long price = LongArgumentType.getLong(ctx, "price");
         String setBy = ctx.getSource().getTextName();
 
@@ -400,7 +405,7 @@ public final class ShopCommand {
 
     private static int debugPrice(CommandContext<CommandSourceStack> ctx,
                                   EconomyServer economy) {
-        String itemId = StringArgumentType.getString(ctx, "item");
+        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
         if (!economy.prices().isReady()) {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_NOT_READY));
             return 0;

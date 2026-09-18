@@ -131,6 +131,7 @@ val metadataProps = mapOf(
     "mc_version_range" to property("meta.mc_range_maven"),
     "forge_loader_range" to property("meta.loader_range"),
     "neoforge_loader_range" to property("meta.loader_range"),
+    "javafml_range" to property("meta.javafml_range"),
     "pack_format" to property("meta.pack_format"),
     "java_level" to javaLevel,
 )

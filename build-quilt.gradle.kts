@@ -37,7 +37,10 @@ tasks.withType<JavaCompile>().configureEach {
 sourceSets.main {
     // Shared loader code.
     java.srcDir(rootProject.file("src/fabric/java"))
-    resources.srcDir(rootProject.file("src/quilt/resources"))
+    // Quilt reads fabric.mod.json through its compatibility layer. Shipping
+    // quilt.mod.json instead would require a Quilt-native ModInitializer from QSL,
+    // which no longer exists.
+    resources.srcDir(rootProject.file("src/fabric/resources"))
 
     // Per-Minecraft-version loader code, for the few classes that genuinely fork
     // between versions (a Mixin whose target signature changed, say). Preferred over
@@ -118,7 +121,7 @@ val metadataProps = mapOf(
 
 tasks.processResources {
     inputs.properties(metadataProps)
-    filesMatching(listOf("fabric.mod.json", "quilt.mod.json", "pack.mcmeta",
+    filesMatching(listOf("fabric.mod.json", "pack.mcmeta",
             "blockies_economy.mixins.json")) {
         expand(metadataProps)
     }

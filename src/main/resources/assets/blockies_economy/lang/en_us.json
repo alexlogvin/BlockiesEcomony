@@ -25,9 +25,9 @@
 
   "blockies_economy.command.balance.self": "You have %s Blockies (%s).",
   "blockies_economy.command.balance.other": "%s has %s Blockies (%s).",
-  "blockies_economy.command.balance.set": "Set %s's balance to %s Blockies (was %s).",
-  "blockies_economy.command.balance.added": "Gave %s %s Blockies. New balance: %s.",
-  "blockies_economy.command.balance.removed": "Took %s Blockies from %s. New balance: %s.",
+  "blockies_economy.command.balance.set": "Set %1$s's balance to %2$s Blockies.",
+  "blockies_economy.command.balance.added": "Gave %1$s %2$s Blockies. New balance: %3$s.",
+  "blockies_economy.command.balance.removed": "Took %2$s Blockies from %1$s. New balance: %3$s.",
   "blockies_economy.command.balance.confirm": "%s is a large change to %s's balance. The confirmation threshold is %s. Repeat the command with 'confirm' on the end if you meant it.",
 
   "blockies_economy.command.buy.success": "Bought %sx %s for %s Blockies. Balance: %s.",
