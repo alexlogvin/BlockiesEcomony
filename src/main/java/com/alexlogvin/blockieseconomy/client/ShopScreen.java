@@ -59,6 +59,15 @@ public final class ShopScreen extends Screen {
     private static final int BALANCE_ICON_SIZE = 10;
     private static final int BALANCE_ICON_GAP = 3;
 
+    /**
+     * How far below a line's top the visible middle of its text is.
+     *
+     * <p>Minecraft's glyphs occupy the first seven rows of a nine-pixel line, leaving the
+     * last two for descenders. Anything centred against the line box therefore sits low
+     * beside the text; centring against this instead lines it up with what the eye sees.
+     */
+    private static final int TEXT_INK_CENTRE = 3;
+
     /** Matches the server's own cap, so the screen cannot ask for what it would refuse. */
     private static final int MAX_TRADE = 10_000;
 
@@ -521,10 +530,13 @@ public final class ShopScreen extends Screen {
             int iconX = right - BALANCE_ICON_SIZE;
             graphics.drawString(font, text, iconX - BALANCE_ICON_GAP - font.width(text),
                     textTop, COLOUR_TITLE);
-            // Centred on the text's own line rather than the panel header, so the two read
-            // as one label however the header grows.
+            // Centred on where the digits actually are, not on the line box that contains
+            // them. Minecraft's glyphs sit in the upper rows of a nine-pixel line and
+            // leave the rest for descenders, so centring on the box puts the coin visibly
+            // low. Centring on the ink is also why this is not (lineHeight - size) / 2 —
+            // which, with a 10-pixel icon on a 9-pixel line, Java truncates to 0 anyway.
             CoinIcon.draw(graphics, iconX,
-                    textTop + (font.lineHeight - BALANCE_ICON_SIZE) / 2, BALANCE_ICON_SIZE);
+                    textTop + TEXT_INK_CENTRE - BALANCE_ICON_SIZE / 2, BALANCE_ICON_SIZE);
         } else {
             String withSymbol = text + " " + ClientMoneyText.currency();
             graphics.drawString(font, withSymbol, right - font.width(withSymbol), textTop,
@@ -614,8 +626,15 @@ public final class ShopScreen extends Screen {
         Entry entry = selectedEntry();
 
         if (entry == null) {
+            // Two lines in every language, not just the ones that need it. The Ukrainian
+            // string ran off the panel on one line, and a message that wraps in some
+            // languages and not others makes the panel jump height as the locale changes.
+            // Two keys rather than one wrapped automatically, so a translator chooses
+            // where the break falls instead of the renderer guessing.
             graphics.drawString(font, Component.translatable(Lang.SHOP_NO_SELECTION),
-                    x, y + 4, COLOUR_LABEL);
+                    x, y + 2, COLOUR_LABEL);
+            graphics.drawString(font, Component.translatable(Lang.SHOP_NO_SELECTION_HINT),
+                    x, y + 2 + font.lineHeight + 2, COLOUR_LABEL);
             return;
         }
 

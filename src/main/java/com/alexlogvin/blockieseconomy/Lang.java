@@ -87,6 +87,13 @@ public final class Lang {
     public static final String SHOP_UNIT_BUY = PREFIX + "shop.unit_buy";
     public static final String SHOP_UNIT_SELL = PREFIX + "shop.unit_sell";
     public static final String SHOP_NO_SELECTION = PREFIX + "shop.no_selection";
+    /**
+     * Second line of the empty-panel message.
+     *
+     * <p>Named for its role rather than its position, so a translator can see that line
+     * one states the fact and line two gives the instruction.
+     */
+    public static final String SHOP_NO_SELECTION_HINT = PREFIX + "shop.no_selection.hint";
     public static final String SHOP_NO_MATCHES = PREFIX + "shop.no_matches";
     public static final String SHOP_NOT_CONNECTED = PREFIX + "shop.not_connected";
     public static final String SHOP_FILTER_ALL = PREFIX + "shop.filter.all";
