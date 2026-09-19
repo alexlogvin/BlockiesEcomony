@@ -41,6 +41,8 @@ public final class ShopScreen extends Screen {
     private static final int CELL_HEIGHT = 30;
     private static final int COLUMNS = 9;
     private static final int MIN_ROWS = 2;
+
+    /** Above this the grid stops growing; a taller window gets whitespace, not 40 rows. */
     private static final int MAX_ROWS = 6;
     private static final int DETAIL_HEIGHT = 92;
     private static final int GRID_TOP_OFFSET = 42;
@@ -53,7 +55,7 @@ public final class ShopScreen extends Screen {
     private static final int COLOUR_PANEL = 0xF0100010;
     private static final int COLOUR_BORDER = 0x50FFFFFF;
 
-    /** Above this the grid stops growing; a taller window gets whitespace, not 40 rows. */
+    /** Matches the server's own cap, so the screen cannot ask for what it would refuse. */
     private static final int MAX_TRADE = 10_000;
 
     // ---- sorting ---------------------------------------------------------------------
