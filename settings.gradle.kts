@@ -50,6 +50,7 @@ stonecutter {
         versions(
             "1.20.1-fabric"   to "1.20.1",
             "1.20.1-forge"    to "1.20.1",
+            "1.20.4-fabric"   to "1.20.4",
             "1.20.6-fabric"   to "1.20.6",
             "1.20.6-neoforge" to "1.20.6",
             "1.21.1-fabric"   to "1.21.1",

@@ -13,15 +13,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Fabric networking for Minecraft 1.21.1, on the payload API introduced in 1.20.5.
+ * Fabric networking for Minecraft 1.20.5 — 1.21.1, on the payload API introduced in 1.20.5.
  *
- * <p>Same shape as the 1.20.1 implementation and deliberately so: one Minecraft channel
- * carries every logical channel, with the name written into the payload. Here that choice
- * pays for itself twice over, because on this version each channel would otherwise need
- * its own payload class, codec and pair of registrations.
+ * <p>Same shape as the raw-buffer implementation the older eras use, and deliberately so:
+ * one Minecraft channel carries every logical channel, with the name written into the
+ * payload. Here that choice pays for itself twice over, because on these versions each
+ * channel would otherwise need its own payload class, codec and pair of registrations.
  *
  * <p>Fabric hands these handlers their payload on the game thread already, so unlike the
- * 1.20.1 implementation there is nothing to queue.
+ * raw-buffer implementation there is nothing to queue.
  */
 public final class FabricNetworking implements Networking {
 

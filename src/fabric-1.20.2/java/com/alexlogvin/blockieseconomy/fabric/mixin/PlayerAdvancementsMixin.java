@@ -1,7 +1,7 @@
 package com.alexlogvin.blockieseconomy.fabric.mixin;
 
 import com.alexlogvin.blockieseconomy.fabric.AdvancementBridge;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Supplies the advancement-earned event Fabric API lacks (Minecraft 1.20.1).
+ * Supplies the advancement-earned event Fabric API lacks (Minecraft 1.20.2 — 1.20.4).
  *
- * <p>The only era where {@code award} takes a bare {@code Advancement}. Identity moved into
- * {@code AdvancementHolder} in 1.20.2, and every later era shares one copy of this class.
+ * <p>Advancement identity moved out of {@code Advancement} into {@code AdvancementHolder}
+ * in 1.20.2, which is why this differs from the 1.20.1 variant and nothing else does.
  */
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin {
@@ -23,12 +23,8 @@ public abstract class PlayerAdvancementsMixin {
     @Shadow
     private ServerPlayer player;
 
-    /**
-     * {@code award} also fires for partial criterion progress, so the completion check
-     * matters: without it a player would be paid repeatedly for one advancement.
-     */
     @Inject(method = "award", at = @At("RETURN"))
-    private void blockiesEconomy$onAward(Advancement advancement, String criterion,
+    private void blockiesEconomy$onAward(AdvancementHolder advancement, String criterion,
                                          CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValueZ()) {
             return;
@@ -36,7 +32,7 @@ public abstract class PlayerAdvancementsMixin {
         AdvancementProgress progress =
                 ((PlayerAdvancements) (Object) this).getOrStartProgress(advancement);
         if (progress.isDone()) {
-            AdvancementBridge.fire(player, advancement.getId());
+            AdvancementBridge.fire(player, advancement.id());
         }
     }
 }

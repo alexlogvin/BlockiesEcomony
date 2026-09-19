@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.thread.BlockableEventLoop;
 
 /**
- * Fabric networking for Minecraft 1.20.1, on the raw-buffer API.
+ * Fabric networking for Minecraft 1.20.2 — 1.20.4, on the raw-buffer API.
  *
  * <p>One Minecraft channel carries every logical channel, with the name written into the
  * payload. Vanilla channels are per-{@code ResourceLocation}, so the alternative is one

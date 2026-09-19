@@ -84,6 +84,7 @@ You can price your own items **without depending on this mod**: ship a datapack 
 |---|---|---|---|---|
 | 1.21, 1.21.1 | yes | yes | deferred | use the Fabric jar |
 | 1.20.5, 1.20.6 | yes | 1.20.6 only | n/a | use the Fabric jar |
+| 1.20.2 – 1.20.4 | yes | not yet | n/a | use the Fabric jar |
 | 1.20.1 | yes | n/a | yes | use the Fabric jar |
 
 NeoForge covers 1.20.6 but not 1.20.5, which never got a stable NeoForge release — only

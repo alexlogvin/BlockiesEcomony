@@ -46,3 +46,21 @@ val srcEra: String = (findProperty("meta.src_era") as String?) ?: nodeVersion
 extra["supportedVersions"] = supportedVersions
 extra["versionsLabel"] = versionsLabel
 extra["srcEra"] = srcEra
+
+/**
+ * The `supported_formats` line for pack.mcmeta, or nothing.
+ *
+ * <p>A span can cross a resource-pack format bump — 1.20.2 is 18 and 1.20.4 is 22 — and a
+ * pack declaring one format on a game expecting the other is reported to the player as
+ * out of date. `supported_formats` is the vanilla way to say "both", and has been
+ * understood since 1.20.2. Nodes covering one format leave it out entirely.
+ */
+val packSupportedFormats: String = (findProperty("meta.pack_formats") as String?)
+    ?.split(",")
+    ?.map { it.trim() }
+    ?.filter { it.isNotEmpty() }
+    ?.takeIf { it.isNotEmpty() }
+    ?.let { ",\n    \"supported_formats\": [${it.joinToString(", ")}]" }
+    ?: ""
+
+extra["packSupportedFormats"] = packSupportedFormats

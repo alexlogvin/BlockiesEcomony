@@ -20,12 +20,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
+
 /**
- * {@link GameAdapter} for Minecraft 1.20.5 — 1.21.1.
+ * {@link GameAdapter} for Minecraft 1.20.2 — 1.20.4.
  *
- * <p>Recipes and advancements carry their identity in a holder, as they have since 1.20.2,
- * and item data is components rather than NBT — the change that separates this era from
- * the 1.20.2 one, and the only place the two classes disagree.
+ * <p>The half-way era. Recipes and advancements already carry their identity in a holder,
+ * as they do from here on, but item data is still NBT rather than components — so this
+ * agrees with the 1.20.5 class everywhere except {@code hasNonDefaultComponents}, and with
+ * the 1.20.1 class only there.
  */
 public final class GameAdapters {
 
@@ -119,10 +121,10 @@ public final class GameAdapters {
 
         @Override
         public boolean hasNonDefaultComponents(ItemStack stack) {
-            // Components replaced NBT in 1.20.5. A stack whose components differ from its
-            // item's prototype carries enchantments, a custom name, potion contents, or
-            // container contents - the shulker-box-full-of-diamonds case.
-            return !stack.getComponentsPatch().isEmpty();
+            // Components do not arrive until 1.20.5; here NBT serves the same purpose. Any
+            // tag at all means the stack is not a plain item: enchantments, custom names,
+            // and the dangerous case of a shulker box carrying BlockEntityTag contents.
+            return stack.hasTag() && !stack.getTag().isEmpty();
         }
 
         @Override

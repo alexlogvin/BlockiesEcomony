@@ -21,6 +21,7 @@ val mcVersion = stonecutter.current.version
 // Minecraft versions, so neither follows from mcVersion alone; see gradle/node-identity.
 val versionsLabel = extra["versionsLabel"] as String
 val srcEra = extra["srcEra"] as String
+val packSupportedFormats = extra["packSupportedFormats"] as String
 val loader = "forge"
 val javaLevel = if (stonecutter.current.parsed >= "1.20.5") 21 else 17
 
@@ -157,6 +158,7 @@ val metadataProps = mapOf(
     "neoforge_loader_range" to property("meta.loader_range"),
     "javafml_range" to property("meta.javafml_range"),
     "pack_format" to property("meta.pack_format"),
+    "pack_supported_formats" to packSupportedFormats,
     "java_level" to javaLevel,
 )
 

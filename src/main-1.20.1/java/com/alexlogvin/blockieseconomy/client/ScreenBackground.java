@@ -4,16 +4,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 
 /**
- * Draws whatever this Minecraft version's own settings screen draws behind itself.
+ * Draws whatever this Minecraft version’s own settings screen draws behind itself.
  *
- * <p>Split per version because the method changed shape in 1.20.5: here it takes only the
- * graphics, and from 1.20.5 it also takes the mouse position and partial tick. A call
- * cannot be written once for both the way an override can, so this is one of the few
- * classes that genuinely forks — hence {@code src/main-&lt;mc&gt;}, not a comment gate.
+ * <p>Minecraft 1.20.1, where {@code renderBackground} takes the graphics alone. It gained
+ * the mouse position and partial tick in 1.20.2, to animate the panorama behind the menus.
+ * A call cannot be written once for both the way an override can, so this is one of the
+ * few classes that genuinely forks — hence {@code src/main-&lt;era&gt;}, not a comment gate.
  *
- * <p>On 1.20.1 that means the dirt texture over the title screen and a dark gradient in a
- * world, which is exactly what vanilla Options looks like here. The blurred panorama
- * arrives with 1.20.5; see the 1.21.1 copy of this class.
+ * <p>Here that means the dirt texture over the title screen and a dark gradient in a
+ * world, which is exactly what vanilla Options looks like on this version.
  */
 public final class ScreenBackground {
 

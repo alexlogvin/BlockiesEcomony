@@ -15,13 +15,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
 /**
- * Balance persistence for Minecraft 1.21.1.
+ * Balance persistence for Minecraft 1.20.5 — 1.21.1.
  *
- * <p>Identical in intent to the 1.20.1 variant — one {@link SavedData} on the overworld,
- * keyed by player UUID, holding balances and the advancement payout guard — and differs
- * only where Mojang changed the API in 1.20.5: {@code save} takes a
- * {@link HolderLookup.Provider}, and {@code computeIfAbsent} takes a
- * {@link SavedData.Factory} rather than a loader/creator pair.
+ * <p>Identical in intent to every other era, and forks only where 1.20.5 threaded
+ * registries through saved data: {@code save} takes a {@link HolderLookup.Provider}, and
+ * the {@link SavedData.Factory} loader is handed one too.
  *
  * <p>See the 1.20.1 class for why balances sit on the overworld and are keyed by UUID
  * rather than attached to the player entity.

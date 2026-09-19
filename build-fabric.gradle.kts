@@ -20,6 +20,7 @@ val mcVersion = stonecutter.current.version
 // Minecraft versions, so neither follows from mcVersion alone; see gradle/node-identity.
 val versionsLabel = extra["versionsLabel"] as String
 val srcEra = extra["srcEra"] as String
+val packSupportedFormats = extra["packSupportedFormats"] as String
 val loader = "fabric"
 val javaLevel = if (stonecutter.current.parsed >= "1.20.5") 21 else 17
 
@@ -142,6 +143,7 @@ val metadataProps = mapOf(
     "mod_issues" to property("mod_issues"),
     "mc_version_range" to property("meta.mc_range_semver"),
     "pack_format" to property("meta.pack_format"),
+    "pack_supported_formats" to packSupportedFormats,
     "java_level" to javaLevel,
 )
 

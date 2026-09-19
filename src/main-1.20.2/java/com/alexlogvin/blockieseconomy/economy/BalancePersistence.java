@@ -13,25 +13,19 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
+
 /**
- * Balance persistence for Minecraft 1.20.1.
+ * Balance persistence for Minecraft 1.20.2 — 1.20.4.
  *
- * <p>Balances and the advancement payout guard live in a single {@link SavedData} on the
- * <em>overworld</em>, keyed by player UUID. Two deliberate choices there:
+ * <p>Identical in intent to every other era — one {@link SavedData} on the overworld,
+ * keyed by player UUID, holding balances and the advancement payout guard — and forks
+ * only because this is the window where {@code computeIfAbsent} takes a
+ * {@link SavedData.Factory} but nothing is handed a registry lookup yet. The 1.20.1 class
+ * predates the factory; the 1.20.5 one adds the lookup to both the factory and
+ * {@code save}.
  *
- * <ul>
- *   <li><b>Overworld, always.</b> {@code getDataStorage()} is per-dimension, so reading it
- *       from wherever the player happens to be would fork everyone’s balance per dimension.</li>
- *   <li><b>Keyed by UUID, not attached to the player entity.</b> Attached data has to be
- *       copied across death and dimension changes, and the three loaders each offer a
- *       different mechanism for it. A SavedData is one implementation that works everywhere
- *       and survives respawn for free.</li>
- * </ul>
- *
- * <p>This era alone passes {@code computeIfAbsent} a loader and a creator. From 1.20.2 it
- * takes a {@code SavedData.Factory}, and from 1.20.5 that factory is handed a registry
- * lookup as well. Later eras carry the same class with those signatures; the reasoning
- * above is written down only here.
+ * <p>See the 1.20.1 class for why balances sit on the overworld and are keyed by UUID
+ * rather than attached to the player entity.
  */
 public final class BalancePersistence {
 
@@ -57,10 +51,13 @@ public final class BalancePersistence {
 
     private static BalanceData get(MinecraftServer server, Ledger ledger,
                                    AwardedAdvancements awarded) {
-        return server.overworld().getDataStorage().computeIfAbsent(
-                tag -> BalanceData.load(tag, ledger, awarded),
+        // The loader takes the tag alone. Registries are not threaded through SavedData
+        // until 1.20.5, which is the only reason this class forks from its 1.20.5 twin.
+        SavedData.Factory<BalanceData> factory = new SavedData.Factory<>(
                 () -> new BalanceData(ledger, awarded),
-                DATA_NAME);
+                tag -> BalanceData.load(tag, ledger, awarded),
+                null);
+        return server.overworld().getDataStorage().computeIfAbsent(factory, DATA_NAME);
     }
 
     private static final class BalanceData extends SavedData {

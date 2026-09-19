@@ -16,8 +16,10 @@ import net.minecraft.client.KeyMapping;
 /**
  * Fabric/Quilt client entry point for Minecraft 1.20.1.
  *
- * <p>Version-specific because Fabric API's HUD callback changed shape after 1.20.1: here it
- * hands over a partial tick as a float, and on 1.21.1 a {@code DeltaTracker}.
+ * <p>Forks because Fabric API’s item-tooltip callback gained a tooltip-type argument in
+ * 1.20.5. The HUD callback changed too — a float partial tick up to 1.20.6, a
+ * {@code DeltaTracker} from 1.21 — but that one is registered with a lambda whose second
+ * parameter is unused and therefore inferred, so it is not what splits this class.
  */
 public final class BlockiesEconomyFabricClient implements ClientModInitializer {
 

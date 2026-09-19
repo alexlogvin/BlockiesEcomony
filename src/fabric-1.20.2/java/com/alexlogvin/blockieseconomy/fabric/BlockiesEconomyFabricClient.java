@@ -13,14 +13,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.KeyMapping;
 
+
 /**
- * Fabric/Quilt client entry point for Minecraft 1.20.5 — 1.21.1.
+ * Fabric/Quilt client entry point for Minecraft 1.20.2 — 1.20.4.
  *
  * <p>Forks because Fabric API’s item-tooltip callback gained a tooltip-type argument in
- * 1.20.5. One source covers the whole era even though Fabric API’s HUD
- * callback changes shape inside it, because the lambda registered for it ignores its second
- * parameter and so has that parameter’s type inferred. The 1.20.6 and 1.21.1 jars differ by
- * exactly this one class; every other class in them is byte-identical.
+ * 1.20.5. Line for line the 1.20.1 class: this era shares its loader
+ * glue and differs only in shared code.
  */
 public final class BlockiesEconomyFabricClient implements ClientModInitializer {
 
@@ -44,13 +43,11 @@ public final class BlockiesEconomyFabricClient implements ClientModInitializer {
             }
         });
 
-        HudRenderCallback.EVENT.register((graphics, deltaTracker) -> BalanceHud.render(graphics));
+        HudRenderCallback.EVENT.register((graphics, partialTick) -> BalanceHud.render(graphics));
 
         // One hook covers JEI, REI and EMI at once: they all draw the vanilla tooltip.
-        // The callback gained a tooltip-type argument in 1.20.5, which is why this line
-        // differs from its 1.20.1 twin.
         ItemTooltipCallback.EVENT.register(
-                (stack, context, type, lines) -> ShopTooltip.append(stack, lines));
+                (stack, context, lines) -> ShopTooltip.append(stack, lines));
 
         ClientPlayConnectionEvents.JOIN.register(
                 (handler, sender, client) -> ClientHooks.onJoinWorld());
