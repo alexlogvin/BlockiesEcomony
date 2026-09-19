@@ -7,12 +7,15 @@ import net.minecraft.client.gui.screens.Screen;
 /**
  * Draws whatever this Minecraft version’s own settings screen draws behind itself.
  *
- * <p>Minecraft 1.20.2 — 1.20.4. {@code renderBackground} gained the mouse position and
- * partial tick here, which it needs to animate the panorama; see the 1.20.1 copy of this
- * class, where it takes the graphics alone.
+ * <p>The Minecraft 1.20.2 era. {@code renderBackground} gained the mouse position and
+ * partial tick in 1.20.2, which it needs to animate the panorama; see the 1.20.1 copy of
+ * this class, where it takes the graphics alone.
  *
- * <p>From this version on that is the blurred title-screen panorama over the menus and a
- * dark gradient in a world — the look vanilla’s own settings screens have.
+ * <p>Line for line the same in every era from 1.20.2 on. It is copied rather than shared
+ * because an era owns a source directory as a whole, and these eras fork elsewhere.
+ *
+ * <p>What it draws is the blurred title-screen panorama over the menus and a dark gradient
+ * in a world — the look vanilla’s own settings screens have.
  */
 public final class ScreenBackground {
 

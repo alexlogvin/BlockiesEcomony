@@ -14,7 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
 /**
- * Balance persistence for Minecraft 1.20.1.
+ * Balance persistence for the Minecraft 1.20.1 era.
  *
  * <p>Balances and the advancement payout guard live in a single {@link SavedData} on the
  * <em>overworld</em>, keyed by player UUID. Two deliberate choices there:

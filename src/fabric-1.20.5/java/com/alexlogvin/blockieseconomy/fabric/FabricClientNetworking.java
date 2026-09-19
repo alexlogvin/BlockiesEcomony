@@ -6,7 +6,7 @@ import java.util.Map;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 /**
- * The client-only half of {@link FabricNetworking}, for Minecraft 1.20.5 — 1.21.1.
+ * The client-only half of {@link FabricNetworking}, for the Minecraft 1.20.5 era.
  *
  * <p>Separate from its caller so a dedicated server never loads it. Fabric’s
  * {@code ClientPlayNetworking} lives in a client-only module, and a class that merely

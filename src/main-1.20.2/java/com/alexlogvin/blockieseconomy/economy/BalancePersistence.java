@@ -15,7 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 
 /**
- * Balance persistence for Minecraft 1.20.2 — 1.20.4.
+ * Balance persistence for the Minecraft 1.20.2 era.
  *
  * <p>Identical in intent to every other era — one {@link SavedData} on the overworld,
  * keyed by player UUID, holding balances and the advancement payout guard — and forks

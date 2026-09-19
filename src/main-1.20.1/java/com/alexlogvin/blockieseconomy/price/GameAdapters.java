@@ -22,7 +22,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 /**
- * {@link GameAdapter} for Minecraft 1.20.1.
+ * {@link GameAdapter} for the Minecraft 1.20.1 era.
  *
  * <p>The oldest era, and the only one where a recipe carries its own id and an advancement
  * its own parent pointer. Identity moved into {@code RecipeHolder} and

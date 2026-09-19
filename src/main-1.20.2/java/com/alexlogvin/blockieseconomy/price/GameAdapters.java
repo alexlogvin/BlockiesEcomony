@@ -22,7 +22,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 
 
 /**
- * {@link GameAdapter} for Minecraft 1.20.2 — 1.20.4.
+ * {@link GameAdapter} for the Minecraft 1.20.2 era.
  *
  * <p>The half-way era. Recipes and advancements already carry their identity in a holder,
  * as they do from here on, but item data is still NBT rather than components — so this

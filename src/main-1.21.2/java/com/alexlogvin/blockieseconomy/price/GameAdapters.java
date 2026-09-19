@@ -26,7 +26,7 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 /**
- * {@link GameAdapter} for Minecraft 1.21.2 — 1.21.4.
+ * {@link GameAdapter} for the Minecraft 1.21.2 era.
  *
  * <p>Where the recipe rewrite lands. A recipe no longer reports its own result or
  * ingredients: the result comes from a display entry resolved against the world, and the

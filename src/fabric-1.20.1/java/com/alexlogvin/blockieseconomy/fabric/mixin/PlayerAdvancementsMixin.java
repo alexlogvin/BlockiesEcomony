@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Supplies the advancement-earned event Fabric API lacks (Minecraft 1.20.1).
+ * Supplies the advancement-earned event Fabric API lacks (the Minecraft 1.20.1 era).
  *
  * <p>The only era where {@code award} takes a bare {@code Advancement}. Identity moved into
  * {@code AdvancementHolder} in 1.20.2, and every later era shares one copy of this class.

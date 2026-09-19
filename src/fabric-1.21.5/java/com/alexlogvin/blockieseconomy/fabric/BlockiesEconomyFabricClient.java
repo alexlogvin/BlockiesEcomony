@@ -14,7 +14,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.KeyMapping;
 
 /**
- * Fabric/Quilt client entry point for Minecraft 1.20.5 — 1.21.1.
+ * Fabric/Quilt client entry point for the Minecraft 1.21.5 era.
  *
  * <p>Forks because Fabric API’s item-tooltip callback gained a tooltip-type argument in
  * 1.20.5. One source covers the whole era even though Fabric API’s HUD

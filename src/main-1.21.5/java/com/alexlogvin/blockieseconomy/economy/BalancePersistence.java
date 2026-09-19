@@ -15,7 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
- * Balance persistence for Minecraft 1.21.5.
+ * Balance persistence for the Minecraft 1.21.5 era.
  *
  * <p>Where saved data stopped serialising itself. {@code SavedData.Factory} is gone,
  * {@code save} is no longer an override, and a store now declares a

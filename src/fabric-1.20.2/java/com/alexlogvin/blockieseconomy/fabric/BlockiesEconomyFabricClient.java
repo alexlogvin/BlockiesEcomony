@@ -15,7 +15,7 @@ import net.minecraft.client.KeyMapping;
 
 
 /**
- * Fabric/Quilt client entry point for Minecraft 1.20.2 — 1.20.4.
+ * Fabric/Quilt client entry point for the Minecraft 1.20.2 era.
  *
  * <p>Forks because Fabric API’s item-tooltip callback gained a tooltip-type argument in
  * 1.20.5. Line for line the 1.20.1 class: this era shares its loader

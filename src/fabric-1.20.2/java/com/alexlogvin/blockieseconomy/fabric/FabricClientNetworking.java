@@ -8,7 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * The client-only half of {@link FabricNetworking}, for Minecraft 1.20.2 — 1.20.4.
+ * The client-only half of {@link FabricNetworking}, for the Minecraft 1.20.2 era.
  *
  * <p>Separate from its caller so a dedicated server never loads it. Fabric’s
  * {@code ClientPlayNetworking} lives in a client-only module, and a class that merely

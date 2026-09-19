@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Fabric networking for Minecraft 1.20.5 — 1.21.1, on the payload API introduced in 1.20.5.
+ * Fabric networking for the Minecraft 1.21.2 era, on the payload API introduced in 1.20.5.
  *
  * <p>Same shape as the raw-buffer implementation the older eras use, and deliberately so:
  * one Minecraft channel carries every logical channel, with the name written into the

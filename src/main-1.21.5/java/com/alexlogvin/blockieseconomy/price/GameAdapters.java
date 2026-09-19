@@ -26,18 +26,11 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 /**
- * {@link GameAdapter} for Minecraft 1.21.2 — 1.21.4.
+ * {@link GameAdapter} for the Minecraft 1.21.5 era.
  *
- * <p>Where the recipe rewrite lands. A recipe no longer reports its own result or
- * ingredients: the result comes from a display entry resolved against the world, and the
- * ingredients from a placement info. Its id is a {@code ResourceKey} rather than a
- * {@code ResourceLocation}, and an ingredient hands over item holders rather than sample
- * stacks.
- *
- * <p>Everything else is the 1.20.5 class. Note that emptiness of an ingredient is read off
- * the resolved item list rather than {@code Ingredient.isEmpty()}, which 1.21.2 and 1.21.3
- * do not have and 1.21.4 does — that single choice is what lets these three versions
- * share one jar.
+ * <p>Line for line the 1.21.2 class. The recipe rewrite it was written for — results
+ * resolved from display entries, ingredients from a placement info, a {@code ResourceKey}
+ * for an id — is unchanged here; this era forks over saved data instead.
  */
 public final class GameAdapters {
 

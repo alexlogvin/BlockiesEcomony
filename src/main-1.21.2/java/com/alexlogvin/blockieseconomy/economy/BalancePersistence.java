@@ -15,7 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
 /**
- * Balance persistence for Minecraft 1.20.5 — 1.21.1.
+ * Balance persistence for the Minecraft 1.21.2 era.
  *
  * <p>Identical in intent to every other era, and forks only where 1.20.5 threaded
  * registries through saved data: {@code save} takes a {@link HolderLookup.Provider}, and

@@ -118,25 +118,36 @@ whole 1.21 line: the price engine reads the recipe manager directly, that API wa
 1.21.2, and a jar claiming the versions after it would install happily and then fail to price
 anything.
 
-Where the breaks fall, measured by compiling the mod against every release and resolving the
-built bytecode against each one:
+### Eras
 
-| Span | What changes at the lower edge |
-|---|---|
-| 1.20.1 | `Advancement` still carries its own id; recipes are not yet `RecipeHolder` |
-| 1.20.2 – 1.20.4 | identity moves to `AdvancementHolder`; `RecipeHolder` arrives |
-| 1.20.5 – 1.20.6 | `SavedData.Factory`; the component and payload rewrites |
-| 1.21 – 1.21.1 | Fabric API’s `HudRenderCallback` takes a `DeltaTracker` |
-| 1.21.2 – 1.21.4 | recipes become a datapack registry; `Ingredient.getItems` removed |
-| 1.21.5 | `SavedData.Factory` removed; `CompoundTag` getters return `Optional` |
-| 1.21.6 – 1.21.8 | `GuiGraphics` moves to `RenderPipeline`; pose becomes `Matrix3x2f` |
-| 1.21.9 – 1.21.10 | `Screen` input signatures change; keybind categories become a type |
-| 1.21.11 | widest break of the line |
+Everything that differs by Minecraft version lives in one of a handful of **eras**. An era is a
+source directory, `src/main-<era>` and `src/<loader>-<era>`, named after the earliest version it
+covers; a node picks one with `meta.src_era`. This table is the map, and the only place the
+spans are written down — the class javadocs name their era, never its range, so widening a span
+does not mean editing source.
 
-Spans are narrow because Minecraft changes, not because of how this mod is built: only three
-classes fork by version at all. One jar per **loader** is unavoidable for a different reason —
-Fabric resolves intermediary names at runtime while NeoForge and Forge use Mojmap and SRG, so
-the same bytes cannot satisfy two of them.
+| Era | Minecraft | What forces the break at its lower edge |
+|---|---|---|
+| `1.20.1` | 1.20.1 | the last version where a recipe carries its own id and an advancement its own parent |
+| `1.20.2` | 1.20.2 — 1.20.4 | identity moves into `RecipeHolder` and `AdvancementHolder`; `renderBackground` gains arguments |
+| `1.20.5` | 1.20.5 — 1.21.1 | item NBT becomes components; networking becomes payloads; saved data is handed registries |
+| `1.21.2` | 1.21.2 — 1.21.4 | the recipe rewrite; `GuiGraphics.blit` takes a render type |
+| `1.21.5` | 1.21.5 | saved data moves to codecs; `CompoundTag` getters return `Optional` |
+
+Only three kinds of class fork: the recipe and advancement adapter, balance persistence, and two
+one-method helpers for drawing and for registering a reload listener. Everything else — about
+6,000 lines — is shared by every era.
+
+The `1.20.5` era is the one covering two spans rather than one. Its source compiles correctly on
+1.20.6 and on 1.21 alike, because the only thing changing between them is Fabric API's HUD
+callback, and that is registered with a lambda whose second parameter is unused and so has its
+type inferred. The two jars differ by exactly that one class, which is why they are still two
+jars.
+
+Versions past 1.21.5 are not covered yet. Measured against the current source, 1.21.6 — 1.21.8
+moves `GuiGraphics` onto `RenderPipeline` and the pose onto `Matrix3x2f`, 1.21.9 — 1.21.10
+changes the `Screen` input signatures and makes keybind categories a type, and 1.21.11 is the
+widest break in the line.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).
