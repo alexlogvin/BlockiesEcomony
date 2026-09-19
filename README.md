@@ -82,6 +82,7 @@ You can price your own items **without depending on this mod**: ship a datapack 
 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
+| 1.21.9, 1.21.10 | yes | yes | deferred | use the Fabric jar |
 | 1.21.6 — 1.21.8 | yes | yes | deferred | use the Fabric jar |
 | 1.21.5 | yes | yes | deferred | use the Fabric jar |
 | 1.21.2 – 1.21.4 | yes | yes | deferred | use the Fabric jar |
@@ -135,10 +136,17 @@ does not mean editing source.
 | `1.21.2` | 1.21.2 — 1.21.4 | the recipe rewrite; `GuiGraphics.blit` takes a render type |
 | `1.21.5` | 1.21.5 | saved data moves to codecs; `CompoundTag` getters return `Optional` |
 | `1.21.6` | 1.21.6 — 1.21.8 | drawing moves onto render pipelines; the pose stack becomes a JOML `Matrix3x2fStack`; tooltips are queued for the next frame |
+| `1.21.9` | 1.21.9, 1.21.10 | screen input becomes records; `GameProfile` becomes a record; the profile cache becomes a resolver; keybind categories become registered objects |
 
-Four kinds of class fork: the recipe and advancement adapter, balance persistence, the screen
-background, and one collecting every `GuiGraphics` call whose shape changed. NeoForge adds two
-more of its own. Everything else — about 6,000 lines — is shared by every era.
+Seven kinds of class fork, none of them large: the recipe and advancement adapter, balance
+persistence, the screen background, the screens' own base class, the keybind, profile lookups,
+and one collecting every `GuiGraphics` call whose shape changed. NeoForge adds three more.
+Everything else — about 6,000 lines — is shared by every era.
+
+The base class is the interesting one. Every other fork is a *call*, which can be routed
+through a helper; screen input is an *override*, whose signature has to match whatever the
+version declares. Without a per-era base class the two screens would fork whole, and between
+them they are the better part of a thousand lines.
 
 The `1.20.5` era is the one covering two spans rather than one. Its source compiles correctly on
 1.20.6 and on 1.21 alike, because the only thing changing between them is Fabric API's HUD
@@ -146,9 +154,7 @@ callback, and that is registered with a lambda whose second parameter is unused 
 type inferred. The two jars differ by exactly that one class, which is why they are still two
 jars.
 
-Versions past 1.21.8 are not covered yet. Measured against the current source, 1.21.9 —
-1.21.10 changes the `Screen` input signatures and makes keybind categories a type, and 1.21.11
-is the widest break in the line.
+Versions past 1.21.10 are not covered yet. 1.21.11 is the widest break in the line.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).

@@ -40,7 +40,7 @@ import net.minecraft.network.chat.Component;
  * file covers every loader and both Minecraft versions. The single call that does differ
  * is the background, which lives in {@link ScreenBackground}.
  */
-public final class ConfigScreen extends Screen {
+public final class ConfigScreen extends EraScreen {
 
     /** Content column width, matching the 310-wide block vanilla's options screens use. */
     private static final int CONTENT_WIDTH = 310;

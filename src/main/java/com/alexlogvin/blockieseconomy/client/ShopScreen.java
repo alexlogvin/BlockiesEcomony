@@ -32,7 +32,7 @@ import net.minecraft.world.item.ItemStack;
  * buttons are what the player should expect to pay; the server recomputes all of it before
  * a single Blockie moves.
  */
-public final class ShopScreen extends Screen {
+public final class ShopScreen extends EraScreen {
 
     // ---- layout ----------------------------------------------------------------------
 
@@ -723,7 +723,7 @@ public final class ShopScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    protected boolean onMouseClick(double mouseX, double mouseY, int button) {
         Entry entry = entryAt(mouseX, mouseY);
         if (entry != null) {
             if (button == 1) {
@@ -735,7 +735,7 @@ public final class ShopScreen extends Screen {
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return false;
     }
 
     private void togglePin(String itemId) {
@@ -766,7 +766,7 @@ public final class ShopScreen extends Screen {
         int direction = delta > 0 ? 1 : -1;
 
         if (mouseY >= detailTop() && selected != null) {
-            boolean shift = hasShiftDown();
+            boolean shift = shiftHeld();
             setAmount(amount + direction * (shift ? 64 : 1));
             return true;
         }
@@ -778,14 +778,14 @@ public final class ShopScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    protected boolean onKeyPress(int keyCode) {
         // The search box swallows every printable key, so Escape has to be handled before
         // it gets the chance, or the screen becomes impossible to leave by keyboard.
         if (keyCode == 256) {
             onClose();
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return false;
     }
 
     // ---- results ---------------------------------------------------------------------

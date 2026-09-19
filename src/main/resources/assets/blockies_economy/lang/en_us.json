@@ -116,5 +116,6 @@
   "blockies_economy.tooltip.price": "Shop: buy %1$s / sell %2$s",
 
   "key.categories.blockies_economy": "Blockies Economy",
+  "key.category.blockies_economy.shop": "Blockies Economy",
   "key.blockies_economy.open_shop": "Open shop"
 }

@@ -4,7 +4,6 @@ import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.platform.Platform;
 import java.nio.file.Path;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 
 /** NeoForge implementation of {@link Platform}. */
@@ -27,12 +26,12 @@ public final class NeoForgePlatform implements Platform {
 
     @Override
     public boolean isPhysicalClient() {
-        return FMLLoader.getDist().isClient();
+        return LoaderInfo.isPhysicalClient();
     }
 
     @Override
     public boolean isDevelopment() {
-        return !FMLLoader.isProduction();
+        return LoaderInfo.isDevelopment();
     }
 
     @Override

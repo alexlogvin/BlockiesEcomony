@@ -115,5 +115,6 @@
   "blockies_economy.tooltip.price": "Крамниця: купівля %1$s / продаж %2$s",
 
   "key.categories.blockies_economy": "Blockies Economy",
+  "key.category.blockies_economy.shop": "Blockies Economy",
   "key.blockies_economy.open_shop": "Відкрити крамницю"
 }

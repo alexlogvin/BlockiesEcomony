@@ -9,6 +9,7 @@ import com.alexlogvin.blockieseconomy.core.net.ShopSnapshotCodec;
 import com.alexlogvin.blockieseconomy.core.price.PriceEntry;
 import com.alexlogvin.blockieseconomy.economy.TradeOutcome;
 import com.alexlogvin.blockieseconomy.platform.Networking;
+import com.alexlogvin.blockieseconomy.platform.Profiles;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -141,7 +142,7 @@ public final class ServerNetwork {
         }
 
         BlockiesEconomy.LOGGER.debug("Sent {} price table to {} ({} bytes in {} frame(s)).",
-                how, player.getGameProfile().getName(), message.length, frames.size());
+                how, Profiles.nameOf(player.getGameProfile()), message.length, frames.size());
     }
 
     private Snapshot findInHistory(byte[] hash) {
@@ -169,7 +170,7 @@ public final class ServerNetwork {
             BlockiesEconomy.LOGGER.warn(
                     "{} is on protocol {}, this server speaks {}; the shop screen will be "
                             + "empty for them until they update.",
-                    player.getGameProfile().getName(), protocol, Channels.PROTOCOL_VERSION);
+                    Profiles.nameOf(player.getGameProfile()), protocol, Channels.PROTOCOL_VERSION);
             return;
         }
 

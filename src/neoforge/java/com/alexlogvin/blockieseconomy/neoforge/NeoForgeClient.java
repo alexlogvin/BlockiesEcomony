@@ -5,6 +5,7 @@ import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
 import com.alexlogvin.blockieseconomy.client.ConfigScreen;
+import com.alexlogvin.blockieseconomy.client.ShopKeyMapping;
 import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
@@ -66,8 +67,7 @@ public final class NeoForgeClient {
     }
 
     private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        openShop = new KeyMapping(Lang.KEY_OPEN_SHOP, InputConstants.Type.KEYSYM,
-                InputConstants.KEY_PERIOD, Lang.KEY_CATEGORY);
+        openShop = ShopKeyMapping.create();
         event.register(openShop);
     }
 

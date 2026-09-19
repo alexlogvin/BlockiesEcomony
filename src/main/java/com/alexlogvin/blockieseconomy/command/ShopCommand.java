@@ -1,10 +1,11 @@
 package com.alexlogvin.blockieseconomy.command;
 
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
-import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.EconomyServer;
+import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.core.price.PriceEntry;
 import com.alexlogvin.blockieseconomy.economy.TradeOutcome;
+import com.alexlogvin.blockieseconomy.platform.Profiles;
 import com.alexlogvin.blockieseconomy.platform.Services;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
@@ -489,21 +490,16 @@ public final class ShopCommand {
         if (online != null) {
             return online.getUUID();
         }
-        Optional<GameProfile> cached = server.getProfileCache() == null
-                ? Optional.empty()
-                : server.getProfileCache().get(name);
-        return cached.map(GameProfile::getId).orElse(null);
+        return Profiles.idFor(server, name);
     }
 
     private static String nameOf(MinecraftServer server, UUID uuid) {
         ServerPlayer online = server.getPlayerList().getPlayer(uuid);
         if (online != null) {
-            return online.getGameProfile().getName();
+            return Profiles.nameOf(online.getGameProfile());
         }
-        Optional<GameProfile> cached = server.getProfileCache() == null
-                ? Optional.empty()
-                : server.getProfileCache().get(uuid);
-        return cached.map(GameProfile::getName).orElse(uuid.toString().substring(0, 8));
+        String cached = Profiles.nameFor(server, uuid);
+        return cached != null ? cached : uuid.toString().substring(0, 8);
     }
 
     /** Writes the whole price table to generated/prices.csv for spreadsheet balancing. */

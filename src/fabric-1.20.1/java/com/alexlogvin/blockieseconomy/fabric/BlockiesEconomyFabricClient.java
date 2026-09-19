@@ -3,6 +3,7 @@ package com.alexlogvin.blockieseconomy.fabric;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.alexlogvin.blockieseconomy.client.ShopKeyMapping;
 import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
@@ -29,11 +30,7 @@ public final class BlockiesEconomyFabricClient implements ClientModInitializer {
 
         // A standard KeyMapping rather than a hardcoded key, so it appears in Controls and
         // a player who already uses Period for something else can move it.
-        KeyMapping openShop = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                Lang.KEY_OPEN_SHOP,
-                InputConstants.Type.KEYSYM,
-                InputConstants.KEY_PERIOD,
-                Lang.KEY_CATEGORY));
+        KeyMapping openShop = KeyBindingHelper.registerKeyBinding(ShopKeyMapping.create());
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             // consumeClick drains the queue, so this must run every tick regardless of

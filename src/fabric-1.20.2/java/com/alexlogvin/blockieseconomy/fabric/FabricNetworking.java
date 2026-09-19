@@ -2,6 +2,7 @@ package com.alexlogvin.blockieseconomy.fabric;
 
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.platform.Networking;
+import com.alexlogvin.blockieseconomy.platform.Profiles;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -66,7 +67,7 @@ public final class FabricNetworking implements Networking {
             } catch (RuntimeException e) {
                 // A client can send anything. One bad packet must not take the server down.
                 BlockiesEconomy.LOGGER.warn("Bad '{}' packet from {}: {}",
-                        name, player.getGameProfile().getName(), e.toString());
+                        name, Profiles.nameOf(player.getGameProfile()), e.toString());
             }
         });
     }

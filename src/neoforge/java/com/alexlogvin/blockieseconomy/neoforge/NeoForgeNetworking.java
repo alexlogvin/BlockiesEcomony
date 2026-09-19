@@ -2,6 +2,7 @@ package com.alexlogvin.blockieseconomy.neoforge;
 
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.platform.Networking;
+import com.alexlogvin.blockieseconomy.platform.Profiles;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.network.FriendlyByteBuf;
@@ -107,7 +108,7 @@ public final class NeoForgeNetworking implements Networking {
                     } catch (RuntimeException e) {
                         // A client can send anything; one bad packet is not a crash.
                         BlockiesEconomy.LOGGER.warn("Bad '{}' packet from {}: {}",
-                                payload.channel(), player.getGameProfile().getName(),
+                                payload.channel(), Profiles.nameOf(player.getGameProfile()),
                                 e.toString());
                     }
                 }));

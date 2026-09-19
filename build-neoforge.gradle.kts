@@ -108,7 +108,14 @@ dependencies {
     // Dev runs load the compiled classes directory rather than the jar, so :core is not
     // merged in yet at that point. Without this the mod loads and then dies on a
     // ClassNotFoundException the moment it reads its config.
-    "additionalRuntimeClasspath"(project(":core"))
+    //
+    // Only up to 1.21.9. ModDevGradle retired the additional classpath for the versions
+    // after it, where the run already sees everything on the implementation configuration.
+    // The configuration still exists there but refuses dependencies, so this is a version
+    // check rather than a check for whether it is present.
+    if (stonecutter.current.parsed < "1.21.10") {
+        "additionalRuntimeClasspath"(project(":core"))
+    }
 }
 
 // :core is plain Java with no Minecraft dependency, so its classes are merged into

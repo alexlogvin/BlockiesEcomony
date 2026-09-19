@@ -7,6 +7,7 @@ import com.alexlogvin.blockieseconomy.core.ledger.RateLimiter;
 import com.alexlogvin.blockieseconomy.core.ledger.TransactionResult;
 import com.alexlogvin.blockieseconomy.core.price.PriceEntry;
 import com.alexlogvin.blockieseconomy.core.price.TradeCalculator;
+import com.alexlogvin.blockieseconomy.platform.Profiles;
 import com.alexlogvin.blockieseconomy.price.GameAdapter;
 import com.alexlogvin.blockieseconomy.price.PriceEngine;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -117,7 +118,7 @@ public final class EconomyManager {
         }
 
         int dropped = deliver(player, item, count);
-        log.record(player.getUUID(), player.getGameProfile().getName(), charged,
+        log.record(player.getUUID(), Profiles.nameOf(player.getGameProfile()), charged,
                 "buy " + count + "x " + itemId);
         markDirty(player);
 
@@ -203,7 +204,7 @@ public final class EconomyManager {
             return TradeOutcome.failure(mapFailure(paid), itemId, count, total);
         }
 
-        log.record(player.getUUID(), player.getGameProfile().getName(), paid,
+        log.record(player.getUUID(), Profiles.nameOf(player.getGameProfile()), paid,
                 "sell " + count + "x " + itemId);
         markDirty(player);
 
@@ -283,7 +284,7 @@ public final class EconomyManager {
         }
         TransactionResult result = ledger.applyDeathPenalty(player.getUUID(), penalty);
         if (result.succeeded()) {
-            log.record(player.getUUID(), player.getGameProfile().getName(), result, "death");
+            log.record(player.getUUID(), Profiles.nameOf(player.getGameProfile()), result, "death");
             markDirty(player);
         }
     }
@@ -295,7 +296,7 @@ public final class EconomyManager {
         }
         TransactionResult result = ledger.award(player.getUUID(), prize);
         if (result.succeeded()) {
-            log.record(player.getUUID(), player.getGameProfile().getName(), result,
+            log.record(player.getUUID(), Profiles.nameOf(player.getGameProfile()), result,
                     "advancement " + advancementId);
             markDirty(player);
         }
