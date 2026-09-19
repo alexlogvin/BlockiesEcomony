@@ -83,13 +83,21 @@ You can price your own items **without depending on this mod**: ship a datapack 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
 | 1.21.1 | yes | yes | deferred | use the Fabric jar |
-| 1.20.1 | yes | n/a | yes | yes |
+| 1.20.1 | yes | n/a | yes | use the Fabric jar |
 
 Forge on 1.21.x is deferred rather than abandoned: the build plugin cannot produce it yet. See
 [PLAN.md](PLAN.md) M16.3.
 
-On 1.20.1 the Quilt jar is the Fabric jar with Quilt metadata — Quilt's own API stack was retired
-in 2025, so there is no Quilt-native API left to target.
+**Quilt runs the Fabric jar.** There is no separate Quilt download, because there would be
+nothing different in it: Quilt's own API stack was retired in 2025, so a Quilt build has no
+Quilt-native API to target, and the jar this repo used to ship for it came out byte-identical to
+the Fabric one. Quilt Loader runs Fabric mods through its compatibility layer, and Fabric API
+has a Quilt-compatible release.
+
+Each jar targets **exactly one** Minecraft version, and says so: the Fabric metadata reads
+`>=1.21.1 <1.21.2`, not `~1.21.1`, which Fabric Loader would have read as the whole 1.21 line.
+The price engine reads the recipe manager directly, and that API was rewritten in 1.21.2, so a
+jar claiming the versions after it would install happily and then fail to price anything.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).

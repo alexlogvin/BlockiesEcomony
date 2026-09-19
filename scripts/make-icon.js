@@ -1,7 +1,7 @@
 // Generates the mod's coin artwork, at every size it is needed:
 //
 //   src/main/resources/assets/blockies_economy/icon.png              256x256  mod list
-//   src/main/resources/.../textures/gui/coin.png                     16x16    HUD
+//   src/main/resources/.../textures/gui/coin.png                     32x32    HUD
 //   branding/icon-1024.png                                           1024x1024  store pages
 //
 // Run with:  node scripts/make-icon.js
@@ -213,7 +213,10 @@ const master = drawCoin(64, 70, GLYPH_LARGE, 4, 4);
 write(`${ASSETS}/icon.png`, master, 64, 4);
 write('branding/icon-1024.png', master, 64, 16);
 
-// Drawn at its own size, not shrunk from the master: at 16 pixels the rim is one pixel and
-// the letter is four, and nothing survives being scaled down into that.
-const hud = drawCoin(16, 7, GLYPH_SMALL, 1, 1.4);
-write(`${ASSETS}/textures/gui/coin.png`, hud, 16, 1);
+// The HUD icon, drawn at 32 and displayed at 16. Drawn at its own size rather than shrunk
+// from the 64 master, because a coin is mostly rim and letter and neither survives being
+// resampled; but at 32 rather than 16 so the texture still has detail left when the player
+// runs a GUI scale above 1, where a 16-pixel texture in a 16-pixel box is drawn at 2x or
+// 3x and goes blocky. The screen size does not change - see BalanceHud.
+const hud = drawCoin(32, 22, GLYPH_LARGE, 2, 2.4);
+write(`${ASSETS}/textures/gui/coin.png`, hud, 32, 1);

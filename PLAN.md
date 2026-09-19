@@ -133,7 +133,9 @@ breaks manifest evaluation instead. This is an upstream limitation, not a defect
 Deferred to **M16.3**, where the plan already placed Forge-on-1.21.x. NeoForge covers that
 audience in the meantime.
 
-**Shipping matrix after M1: 5 jars** — 1.20.1 fabric/forge/quilt, 1.21.1 fabric/neoforge.
+**Shipping matrix: 4 jars** — 1.20.1 fabric/forge, 1.21.1 fabric/neoforge. The Fabric jar
+is published listing Quilt as a supported loader; there is no separate Quilt build, because
+it came out byte-identical to the Fabric one.
 
 ### M2 — `core`: pure-Java foundation (no Minecraft)
 - [x] 2.1 Minimal TOML reader/writer with **comment preservation** — tables, string/int/bool/float, arrays, inline comments. Round-trip tested.
@@ -194,10 +196,11 @@ added to the source set only when present. Verified in the jars — 1.20.1 ships
 Stonecutter comment gates remain the tool for line-level differences; this is for whole
 classes that fork.
 
-**Quilt compiles against Fabric Loader, not Quilt Loader.** Quilt publishes no Mixin
-artifact of its own and QSL/QFAPI were retired, so a Quilt build is a Fabric-shaped mod
-carrying `quilt.mod.json`. Deprecation warnings from Quilt's Fabric compatibility layer
-are expected and documented in `build-quilt.gradle.kts`.
+**Quilt needs no build of its own.** QSL/QFAPI were retired, so a Quilt build had no
+Quilt-native API to target and was simply the Fabric sources compiled against Fabric Loader
+with the same `fabric.mod.json` - the two jars came out identical but for a manifest line
+naming the Stonecutter node. The node was removed and the Fabric jar is published listing
+Quilt among its loaders. Reinstate it only if Quilt ships an API worth targeting.
 
 **Deferred by design:** the client-side SPI — keybinds, HUD render hook, networking and
 inventory operations — lands with M8/M9/M10, where it can be written against real usage

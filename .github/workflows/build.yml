@@ -40,13 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       # Every node is independent, so one loader breaking should still tell us about the
-      # other four rather than cancelling them.
+      # others rather than cancelling them.
       fail-fast: false
       matrix:
         node:
           - 1.20.1-fabric
           - 1.20.1-forge
-          - 1.20.1-quilt
           - 1.21.1-fabric
           - 1.21.1-neoforge
     steps:

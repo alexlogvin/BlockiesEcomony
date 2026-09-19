@@ -29,7 +29,6 @@ jobs:
         node:
           - 1.20.1-fabric
           - 1.20.1-forge
-          - 1.20.1-quilt
           - 1.21.1-fabric
           - 1.21.1-neoforge
     steps:
@@ -52,7 +51,7 @@ jobs:
   publish:
     name: Publish
     # Every node must build before anything is published, so a broken loader cannot leave
-    # four of five versions live on the sites.
+    # three of four versions live on the sites.
     needs: build
     runs-on: ubuntu-latest
     # A dry run still produces every jar; it just stops before anything leaves the repo.

@@ -70,10 +70,10 @@ fun Project.configurePublishing() {
         else -> ReleaseType.STABLE
     }
 
-    // Fabric API is a real requirement of these two jars — fabric.mod.json lists it under
-    // `depends` — and Quilt runs the Fabric jar through its compatibility layer, so it
-    // needs the same. Forge and NeoForge require nothing but their loader.
-    val needsFabricApi = loader == "fabric" || loader == "quilt"
+    // Fabric API is a real requirement of this jar — fabric.mod.json lists it under
+    // `depends` — and that covers Quilt too, which runs the very same jar. Forge and
+    // NeoForge require nothing but their loader.
+    val needsFabricApi = loader == "fabric"
 
     configure<ModPublishExtension> {
         // -Ppublish.dry_run validates everything and uploads nothing.
@@ -96,6 +96,14 @@ fun Project.configurePublishing() {
         displayName.set("$modName $modVersion for Minecraft $mcVersion ($loaderDisplayName)")
         type.set(releaseType)
         modLoaders.add(loader)
+
+        if (loader == "fabric") {
+            // One jar, listed under both loaders. There is no Quilt build: Quilt Loader
+            // runs Fabric mods through its compatibility layer, and this jar carries
+            // nothing Quilt-specific, so a separate one published identical bytes under
+            // another name. See settings.gradle.kts.
+            modLoaders.add("quilt")
+        }
 
         // Set by the release workflow from the commits since the previous tag. The
         // fallback is a link rather than nothing: a version with an empty changelog reads

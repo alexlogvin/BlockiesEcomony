@@ -15,7 +15,6 @@ foojay = "1.0.0"             # JDK auto-provisioning for toolchains + daemon JVM
 
 # --- Loaders (version-independent) ---
 fabric-loader = "0.19.5"
-quilt-loader = "0.31.0-beta.4"
 
 # --- Test ---
 junit = "5.11.4"

@@ -13,7 +13,6 @@ pluginManagement {
         maven("https://maven.fabricmc.net/") { name = "Fabric" }
         maven("https://maven.neoforged.net/releases/") { name = "NeoForged" }
         maven("https://maven.minecraftforge.net/") { name = "MinecraftForge" }
-        maven("https://maven.quiltmc.org/repository/release/") { name = "Quilt" }
     }
 }
 
@@ -42,10 +41,15 @@ stonecutter {
         // post-1.20.1 Forge. Its NeoFormRuntime does not know maven.minecraftforge.net
         // and does not declare forge:universal-srg / mcp_config, which Forge 52.x needs.
         // Tracked as M16.3. NeoForge covers the 1.21.1 Forge-side audience meanwhile.
+        // No Quilt node. The Quilt jar was built from the same sources AND the same
+        // fabric.mod.json as the Fabric one, so the two jars came out byte-identical
+        // apart from a manifest line naming the node - Quilt Loader runs Fabric mods
+        // through its compatibility layer, and QSL, which would have justified a real
+        // Quilt build, was retired in Dec 2025. The Fabric jar is published listing
+        // Quilt as a supported loader instead of shipping the same bytes twice.
         versions(
             "1.20.1-fabric"   to "1.20.1",
             "1.20.1-forge"    to "1.20.1",
-            "1.20.1-quilt"    to "1.20.1",
             "1.21.1-fabric"   to "1.21.1",
             "1.21.1-neoforge" to "1.21.1",
         )

@@ -18,7 +18,17 @@ public final class BalanceHud {
     /** Kept clear of the screen edge, before the player's own offset is applied. */
     private static final int MARGIN = 4;
 
+    /** How big the coin is drawn on screen. Unchanged; only the texture got sharper. */
     private static final int ICON_SIZE = 16;
+
+    /**
+     * The coin texture is 32x32 while it draws into a 16x16 box.
+     *
+     * <p>Two pixels of texture per pixel of screen, so the icon still has detail left at
+     * GUI scale 2 and above, where a 16-pixel texture is magnified and goes visibly blocky
+     * next to the crisp vanilla font beside it. It costs 378 bytes.
+     */
+    private static final int ICON_TEXTURE_SIZE = 32;
     private static final int GAP = 3;
     private static final int TEXT_COLOUR = 0xFFFFFF;
 
@@ -59,7 +69,10 @@ public final class BalanceHud {
         int y = anchor.y(graphics.guiHeight(), height, MARGIN) + config.offsetY();
 
         if (icon) {
-            graphics.blit(ICON, x, y, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+            // The overload that takes the destination size separately from the source
+            // region, which is what lets a 32-pixel texture land in a 16-pixel box.
+            graphics.blit(ICON, x, y, ICON_SIZE, ICON_SIZE, 0.0F, 0.0F,
+                    ICON_TEXTURE_SIZE, ICON_TEXTURE_SIZE, ICON_TEXTURE_SIZE, ICON_TEXTURE_SIZE);
         } else {
             graphics.drawString(minecraft.font, ClientMoneyText.currency(), x,
                     y + (height - minecraft.font.lineHeight) / 2, TEXT_COLOUR);

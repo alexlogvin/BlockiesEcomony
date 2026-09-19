@@ -134,7 +134,7 @@ val metadataProps = mapOf(
 
 tasks.processResources {
     inputs.properties(metadataProps)
-    filesMatching(listOf("fabric.mod.json", "quilt.mod.json", "pack.mcmeta",
+    filesMatching(listOf("fabric.mod.json", "pack.mcmeta",
             "blockies_economy.mixins.json")) {
         expand(metadataProps)
     }
