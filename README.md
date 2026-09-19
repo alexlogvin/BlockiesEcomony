@@ -82,7 +82,7 @@ You can price your own items **without depending on this mod**: ship a datapack 
 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
-| 1.21.1 | yes | yes | deferred | use the Fabric jar |
+| 1.21, 1.21.1 | yes | yes | deferred | use the Fabric jar |
 | 1.20.1 | yes | n/a | yes | use the Fabric jar |
 
 Forge on 1.21.x is deferred rather than abandoned: the build plugin cannot produce it yet. See
@@ -94,10 +94,38 @@ Quilt-native API to target, and the jar this repo used to ship for it came out b
 the Fabric one. Quilt Loader runs Fabric mods through its compatibility layer, and Fabric API
 has a Quilt-compatible release.
 
-Each jar targets **exactly one** Minecraft version, and says so: the Fabric metadata reads
-`>=1.21.1 <1.21.2`, not `~1.21.1`, which Fabric Loader would have read as the whole 1.21 line.
-The price engine reads the recipe manager directly, and that API was rewritten in 1.21.2, so a
-jar claiming the versions after it would install happily and then fail to price anything.
+### Why the version ranges look the way they do
+
+A jar covers a span only where the span is **proven**, never where the versions merely look
+close. The 1.21 jar declares `>=1.21 <1.21.2` because building it against 1.21 and against
+1.21.1 produces remapped classes that are byte-for-byte identical — there is nothing a second
+jar could contain. The NeoForge jar spans the same pair, and drops its loader floor to
+`[21.0,)` to match.
+
+The upper bound is equally deliberate. It is not `~1.21.1`, which Fabric Loader reads as the
+whole 1.21 line: the price engine reads the recipe manager directly, that API was rewritten in
+1.21.2, and a jar claiming the versions after it would install happily and then fail to price
+anything.
+
+Where the breaks fall, measured by compiling the mod against every release and resolving the
+built bytecode against each one:
+
+| Span | What changes at the lower edge |
+|---|---|
+| 1.20.1 | `Advancement` still carries its own id; recipes are not yet `RecipeHolder` |
+| 1.20.2 – 1.20.4 | identity moves to `AdvancementHolder`; `RecipeHolder` arrives |
+| 1.20.5 – 1.20.6 | `SavedData.Factory`; the component and payload rewrites |
+| 1.21 – 1.21.1 | Fabric API’s `HudRenderCallback` takes a `DeltaTracker` |
+| 1.21.2 – 1.21.4 | recipes become a datapack registry; `Ingredient.getItems` removed |
+| 1.21.5 | `SavedData.Factory` removed; `CompoundTag` getters return `Optional` |
+| 1.21.6 – 1.21.8 | `GuiGraphics` moves to `RenderPipeline`; pose becomes `Matrix3x2f` |
+| 1.21.9 – 1.21.10 | `Screen` input signatures change; keybind categories become a type |
+| 1.21.11 | widest break of the line |
+
+Spans are narrow because Minecraft changes, not because of how this mod is built: only three
+classes fork by version at all. One jar per **loader** is unavoidable for a different reason —
+Fabric resolves intermediary names at runtime while NeoForge and Forge use Mojmap and SRG, so
+the same bytes cannot satisfy two of them.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).

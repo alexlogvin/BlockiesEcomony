@@ -53,6 +53,18 @@ fun Project.configurePublishing() {
     val mcVersion = name.substringBeforeLast('-')
     val loader = name.substringAfterLast('-')
 
+    // The Minecraft versions this jar actually runs on, which is not always the one the
+    // node is named after. A node may cover a span: the 1.21.1 jar also runs on 1.21,
+    // because built against either the remapped classes come out byte-identical.
+    val supportedVersions = (findProperty("meta.mc_versions") as String?)
+        ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+        ?: listOf(mcVersion)
+
+    val versionsLabel = when (supportedVersions.size) {
+        1 -> supportedVersions.first()
+        else -> supportedVersions.first() + "-" + supportedVersions.last()
+    }
+
     val modVersion = version.toString()
     val modName = property("mod_name") as String
     val archiveName = the<BasePluginExtension>().archivesName.get()
@@ -93,7 +105,7 @@ fun Project.configurePublishing() {
         // Unique per node, because both sites key versions by this string and five jars go
         // up under one project.
         version.set("$modVersion+$mcVersion-$loader")
-        displayName.set("$modName $modVersion for Minecraft $mcVersion ($loaderDisplayName)")
+        displayName.set("$modName $modVersion for Minecraft $versionsLabel ($loaderDisplayName)")
         type.set(releaseType)
         modLoaders.add(loader)
 
@@ -118,7 +130,7 @@ fun Project.configurePublishing() {
             modrinth {
                 projectId.set(modrinthProjectId)
                 accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
-                minecraftVersions.add(mcVersion)
+                minecraftVersions.addAll(supportedVersions)
                 if (needsFabricApi) {
                     requires("fabric-api")
                 }
@@ -129,7 +141,7 @@ fun Project.configurePublishing() {
             curseforge {
                 projectId.set(curseforgeProjectId)
                 accessToken.set(providers.environmentVariable("CURSEFORGE_TOKEN"))
-                minecraftVersions.add(mcVersion)
+                minecraftVersions.addAll(supportedVersions)
 
                 // CurseForge refuses a file that claims to be for neither side. This mod
                 // runs on both: the server is authoritative and required, the client is
