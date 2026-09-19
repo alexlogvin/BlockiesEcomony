@@ -428,3 +428,50 @@ Per the brief: work `PLAN.md` top to bottom, mark each task `[x]` on completion,
 **UX:** price history sparkline in the detail panel; "what can I afford right now" filter; bulk-sell-inventory button; a recipe-cost breakdown tooltip showing *why* an item costs what it does; sound + particle feedback on transactions; keyboard navigation in the grid.
 
 **Technical:** a benchmark harness for the solver on a 10k-item modpack; a headless `--calculate-prices` CLI mode; fuzz tests on the TOML parser; JMH on the HUD render path; a price-pack validation CI job; content-hash-based incremental price recomputation so `/reload` is cheap; an automated arbitrage-loop *search* (not just per-recipe validation) over the full graph.
+
+---
+
+## Execution log — M8, M9, M10, M5.2, M5.3, M14, M15
+
+**Toolchain note.** `JAVA_HOME` on this machine pointed at a JDK 8 install that no longer
+exists (`jdk-8.0.472.8`; the installed ones are `8.0.442.6` and `8.0.504.1`). The Gradle
+wrapper launcher validates `JAVA_HOME` before Gradle can apply the daemon pin, so every
+build failed until it was pointed at an existing JDK. Nothing in the repo caused it and
+nothing in the repo can fix it — it needs setting in the environment.
+
+**M8 — networking.** Payloads are opaque `byte[]`, encoded in `core/net` with no Minecraft
+types. One Minecraft channel carries every logical channel with the name in the body.
+NeoForge needed two payload types rather than one: it keeps a single registry for both
+directions and refuses a duplicate id, which cost one dedicated-server boot to discover.
+Price tables are deflated, SHA-256 hashed and chunked at 24 KB; 946 vanilla items compress
+to 6.4 KB. A client offers its cached hash on join and gets unchanged, a delta or the full
+table.
+
+**M9/M10 — HUD and shop.** The shop draws its own background and widgets. `Screen#render`
+gained a background call in 1.20.5 that would cover the panel, and `Screen.renderables` is
+private on 1.20.1, so the screen keeps its own widget list and renders it. `mouseScrolled`
+is declared in both the 3-argument (1.20.1) and 4-argument (1.20.5+) forms without
+`@Override`; one overrides on each version and the other is dead code, which is cheaper
+than forking the whole screen.
+
+**Verified by running it.** Every loader boots a dedicated server and solves the same table,
+with identical content hashes per Minecraft version across loaders (`d84dc2d25dea2620` on
+1.20.1, `8d59f42ceacdcb82` on 1.21.1). Three distinct client paths were driven into a real
+world with `-PquickPlay` and checked by screenshot:
+
+| Client | Prices synced | HUD | Shop screen |
+|---|---|---|---|
+| 1.20.1 Fabric | 946 items, cached, "unchanged" on rejoin | yes | yes, bought and sold |
+| 1.20.1 Forge | 946 items | yes | yes |
+| 1.21.1 NeoForge | 974 items | yes | yes |
+
+The 1.20.1 Quilt jar is byte-for-byte the Fabric jar with different metadata, so the Fabric
+result covers it; its server was booted separately.
+
+Testing found three defects that reading had not: Sell stayed enabled with an empty
+inventory, the widget list doubled on every window resize, and the status line compared
+against a fresh `Component.empty()` so it was never equal.
+
+**Still open.** M12 (recipe-viewer integration), M14.4 (mod-publish-plugin — needs Modrinth
+and CurseForge project ids that do not exist yet), M15.1 (README is written but should be
+re-read once M12 lands), M16 (expansion).

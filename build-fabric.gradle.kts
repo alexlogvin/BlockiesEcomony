@@ -46,6 +46,18 @@ sourceSets.main {
     }
 }
 
+
+// -PquickPlay=<world folder> drops straight into a save instead of the title screen.
+// Worth having: the client half of this mod — the HUD, the shop screen, the price sync —
+// only runs once a world is loaded, so testing it by hand otherwise means clicking through
+// two menus every single time. The NeoForge and Forge scripts carry the same option, so
+// one command tests any node.
+if (project.hasProperty("quickPlay")) {
+    loom.runs.named("client") {
+        programArgs("--quickPlaySingleplayer", project.property("quickPlay") as String)
+    }
+}
+
 repositories {
     mavenCentral()
     maven("https://maven.fabricmc.net/") { name = "Fabric" }

@@ -47,6 +47,14 @@ legacyForge {
         create("client") {
             client()
             gameDirectory = file("run")
+            // -PquickPlay=<world folder> drops straight into a save instead of the title
+            // screen. Worth having: the client half of this mod — the HUD, the shop screen,
+            // the price sync — only runs once a world is loaded, so testing it by hand
+            // otherwise means clicking through two menus every single time.
+            if (project.hasProperty("quickPlay")) {
+                programArguments.addAll("--quickPlaySingleplayer",
+                        project.property("quickPlay") as String)
+            }
         }
         create("server") {
             server()
