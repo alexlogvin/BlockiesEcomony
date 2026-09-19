@@ -357,8 +357,20 @@ classes directory rather than the merged jar. None of these is visible to `./gra
 - [x] 11.2 Write computed prizes into `generated/prices.toml`; honour per-advancement overrides from `advancements.toml`
 - [x] 11.3 Award on earn via the platform hook; one-shot guard so re-granting never double-pays
 
-### M12 — Recipe-viewer integration (all compileOnly, never required)
-- [ ] 12.1 Abstract `RecipeViewerBridge` with the capability ladder: **buttons → open Shop UI at item → price display only → skip**
+### M12 — Recipe-viewer integration
+- [x] 12.1 **Tier 3 delivered universally, without any dependency.** A vanilla
+  `ItemTooltipEvent`/`ItemTooltipCallback` hook adds a `Shop: buy N / sell M` line to every
+  item tooltip. JEI, REI and EMI all render the vanilla tooltip, so one hook covers all
+  three at once — and the inventory and creative menu besides. Nothing to break when one of
+  them changes its API, and nothing to install. Toggleable with `tooltip_prices` in
+  `client.toml`. Verified in-game on 1.20.1 Fabric.
+
+  The higher tiers (a Buy button inside a recipe view, or a click that opens the shop at
+  that item) still need each viewer's own API and are **not** done. They are deliberately
+  left rather than guessed: they need `compileOnly` artifacts for three mods across two
+  Minecraft versions, EMI's Yarn-mapped API needs its own remap configuration on this
+  Mojmap project, and none of it can be verified without installing the three mods. Better
+  a floor that cannot fall out than three integrations written blind.
 - [ ] 12.2 EMI — `addRecipeDecorator`, stable on both 1.20.1 and 1.21.x → tier 1. Needs its own remap config (EMI's API is Yarn-mapped)
 - [ ] 12.3 JEI — `addRecipeButtonFactory` (19.27+) → tier 1 on 1.21.1; `addRecipeCategoryDecorator` → tier 3 on 1.20.1. Fabric needs the `jei_mod_plugin` entrypoint, not just the annotation
 - [ ] 12.4 REI — experimental `registerExtension`/`getView` → tier 2 (open Shop UI); degrade to tier 3 if the experimental API is unusable

@@ -3,6 +3,7 @@ package com.alexlogvin.blockieseconomy.forge;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -11,6 +12,7 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 /**
@@ -49,6 +51,10 @@ public final class ForgeClient {
                 BalanceHud.render(event.getGuiGraphics());
             }
         });
+
+        // One hook covers JEI, REI and EMI at once: they all draw the vanilla tooltip.
+        MinecraftForge.EVENT_BUS.addListener((ItemTooltipEvent event) ->
+                ShopTooltip.append(event.getItemStack(), event.getToolTip()));
 
         MinecraftForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingIn event) -> ClientHooks.onJoinWorld());

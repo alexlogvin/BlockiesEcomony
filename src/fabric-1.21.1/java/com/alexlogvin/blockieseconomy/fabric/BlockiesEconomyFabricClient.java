@@ -3,9 +3,11 @@ package com.alexlogvin.blockieseconomy.fabric;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -40,6 +42,12 @@ public final class BlockiesEconomyFabricClient implements ClientModInitializer {
         });
 
         HudRenderCallback.EVENT.register((graphics, deltaTracker) -> BalanceHud.render(graphics));
+
+        // One hook covers JEI, REI and EMI at once: they all draw the vanilla tooltip.
+        // The callback gained a tooltip-type argument in 1.20.5, which is why this line
+        // differs from its 1.20.1 twin.
+        ItemTooltipCallback.EVENT.register(
+                (stack, context, type, lines) -> ShopTooltip.append(stack, lines));
 
         ClientPlayConnectionEvents.JOIN.register(
                 (handler, sender, client) -> ClientHooks.onJoinWorld());

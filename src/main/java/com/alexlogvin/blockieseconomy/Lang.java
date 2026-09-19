@@ -99,6 +99,9 @@ public final class Lang {
     public static final String SHOP_RESULT_SOLD = PREFIX + "shop.result.sold";
     public static final String SHOP_RESULT_DROPPED = PREFIX + "shop.result.dropped";
 
+    // ---- tooltips ----
+    public static final String TOOLTIP_PRICE = PREFIX + "tooltip.price";
+
     // ---- keybind ----
     public static final String KEY_OPEN_SHOP = "key.blockies_economy.open_shop";
     public static final String KEY_CATEGORY = "key.categories.blockies_economy";

@@ -4,6 +4,7 @@ import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
@@ -13,6 +14,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 /**
@@ -40,6 +42,10 @@ public final class NeoForgeClient {
                 ClientHooks.openShop();
             }
         });
+
+        // One hook covers JEI, REI and EMI at once: they all draw the vanilla tooltip.
+        NeoForge.EVENT_BUS.addListener((ItemTooltipEvent event) ->
+                ShopTooltip.append(event.getItemStack(), event.getToolTip()));
 
         NeoForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingIn event) -> ClientHooks.onJoinWorld());

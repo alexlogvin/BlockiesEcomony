@@ -87,6 +87,8 @@
   "blockies_economy.shop.result.bought": "Куплено %1$s за %2$s Blockies.",
   "blockies_economy.shop.result.sold": "Продано %1$s за %2$s Blockies.",
   "blockies_economy.shop.result.dropped": "Куплено %1$s за %2$s Blockies. %3$s випало під ноги.",
+  "blockies_economy.tooltip.price": "Крамниця: купівля %1$s / продаж %2$s",
+
   "key.categories.blockies_economy": "Blockies Economy",
   "key.blockies_economy.open_shop": "Відкрити крамницю"
 }

@@ -18,6 +18,8 @@ items get sensible prices automatically.
   for a responsive UI but is never trusted with a balance.
 - **Client optional.** Without the mod installed client-side you keep every command and lose only
   the GUI and HUD. Vanilla clients can still join.
+- **Prices in every tooltip.** Hovering an item shows its buy and sell price — in your inventory,
+  and in JEI, REI or EMI, all of which draw the vanilla tooltip. No dependency on any of them.
 
 ## Commands
 

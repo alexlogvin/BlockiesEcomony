@@ -87,6 +87,8 @@
   "blockies_economy.shop.result.bought": "Bought %1$s for %2$s Blockies.",
   "blockies_economy.shop.result.sold": "Sold %1$s for %2$s Blockies.",
   "blockies_economy.shop.result.dropped": "Bought %1$s for %2$s Blockies. %3$s dropped at your feet.",
+  "blockies_economy.tooltip.price": "Shop: buy %1$s / sell %2$s",
+
   "key.categories.blockies_economy": "Blockies Economy",
   "key.blockies_economy.open_shop": "Open shop"
 }

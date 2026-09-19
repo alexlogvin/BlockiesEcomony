@@ -19,6 +19,7 @@ public final class ClientConfig {
     private int offsetY = 0;
     private boolean hudVisible = true;
     private boolean showCurrencyIcon = true;
+    private boolean tooltipPrices = true;
     private final List<String> favorites = new ArrayList<String>();
 
     public HudAnchor anchor() {
@@ -59,6 +60,21 @@ public final class ClientConfig {
         this.showCurrencyIcon = show;
     }
 
+    /**
+     * True to add a buy/sell line to item tooltips.
+     *
+     * <p>Covers every recipe viewer at once, because JEI, REI and EMI all render the
+     * vanilla tooltip. That makes it the one integration that needs no dependency on any
+     * of them and cannot break when one of them changes its API.
+     */
+    public boolean tooltipPrices() {
+        return tooltipPrices;
+    }
+
+    public void setTooltipPrices(boolean show) {
+        this.tooltipPrices = show;
+    }
+
     /** Item ids the player pinned in the shop. */
     public List<String> favorites() {
         return favorites;
@@ -73,6 +89,7 @@ public final class ClientConfig {
         c.offsetY = (int) doc.getLong(TABLE_HUD, "offset_y", c.offsetY);
         c.hudVisible = doc.getBoolean(TABLE_HUD, "visible", c.hudVisible);
         c.showCurrencyIcon = doc.getBoolean(TABLE_HUD, "show_currency_icon", c.showCurrencyIcon);
+        c.tooltipPrices = doc.getBoolean(TABLE_SHOP, "tooltip_prices", c.tooltipPrices);
 
         TomlValue favorites = doc.value(TABLE_SHOP, "favorites");
         if (favorites != null && favorites.kind() == TomlValue.Kind.ARRAY) {
@@ -112,6 +129,11 @@ public final class ClientConfig {
 
         TomlTable shop = doc.table(TABLE_SHOP);
         shop.comments().add("Shop screen preferences.");
+
+        put(shop, "tooltip_prices", TomlValue.of(tooltipPrices),
+                "Add a buy/sell line to item tooltips, in your inventory and in any recipe",
+                "viewer. JEI, REI and EMI all draw the vanilla tooltip, so this works in all",
+                "three without needing any of them installed.");
 
         List<TomlValue> favoriteValues = new ArrayList<TomlValue>();
         for (int i = 0; i < favorites.size(); i++) {
