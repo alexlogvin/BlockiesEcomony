@@ -12,6 +12,7 @@ import com.alexlogvin.blockieseconomy.core.toml.TomlValue;
 import com.alexlogvin.blockieseconomy.economy.AwardedAdvancements;
 import com.alexlogvin.blockieseconomy.economy.BalancePersistence;
 import com.alexlogvin.blockieseconomy.economy.EconomyManager;
+import com.alexlogvin.blockieseconomy.net.ServerNetwork;
 import com.alexlogvin.blockieseconomy.platform.ServerEvents;
 import com.alexlogvin.blockieseconomy.platform.Services;
 import com.alexlogvin.blockieseconomy.price.GameAdapter;
@@ -37,6 +38,7 @@ public final class EconomyServer {
     private final GameAdapter adapter = GameAdapters.create();
     private PriceEngine prices;
     private EconomyManager economy;
+    private ServerNetwork network;
     private MinecraftServer server;
 
     /** Advancement id to prize, computed once per rebuild. */
@@ -62,7 +64,10 @@ public final class EconomyServer {
         config.load();
         prices = new PriceEngine(config, adapter);
         economy = new EconomyManager(config, prices, adapter);
-        economy.setBalanceChangeListener(this::markBalancesDirty);
+        economy.setBalanceChangeListener(this::onBalanceChanged);
+
+        network = new ServerNetwork(this, Services.NETWORKING);
+        network.register();
 
         events.onServerStarted(this::onServerStarted);
         events.onServerStopping(this::onServerStopping);
@@ -144,10 +149,14 @@ public final class EconomyServer {
         computeAdvancementPrizes(target);
         prices.rebuildAsync(target, () -> {
             writeGeneratedPrices();
-            if (onComplete != null) {
-                // Back onto the server thread: the caller sends chat messages.
-                target.execute(onComplete);
-            }
+            // Back onto the server thread for both of these: the network code reads the
+            // player list, and the caller sends chat messages.
+            target.execute(() -> {
+                network.onPricesRebuilt(target.getPlayerList().getPlayers());
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+            });
         });
     }
 
@@ -172,6 +181,36 @@ public final class EconomyServer {
     public void markBalancesDirty() {
         if (server != null) {
             BalancePersistence.markDirty(server, economy.ledger(), awarded);
+        }
+    }
+
+    /** Asks a client to open the shop screen. False when it has no client-side mod. */
+    public boolean requestOpenShop(ServerPlayer player) {
+        return network.requestOpenShop(player);
+    }
+
+    /** Flags the save data and tells that one client its balance moved. */
+    private void onBalanceChanged(ServerPlayer player) {
+        markBalancesDirty();
+        if (player != null) {
+            network.sendBalance(player);
+        }
+    }
+
+    /**
+     * Pushes a balance an operator changed to the player, if they are online.
+     *
+     * <p>Admin commands work by UUID so they can reach an offline player, which is why
+     * this takes one rather than a {@code ServerPlayer}. An offline player has nothing to
+     * push to and picks the new figure up when they next join.
+     */
+    public void syncBalance(java.util.UUID playerId) {
+        if (server == null) {
+            return;
+        }
+        ServerPlayer online = server.getPlayerList().getPlayer(playerId);
+        if (online != null) {
+            network.sendBalance(online);
         }
     }
 

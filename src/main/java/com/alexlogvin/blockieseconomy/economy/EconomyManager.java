@@ -11,7 +11,6 @@ import com.alexlogvin.blockieseconomy.price.GameAdapter;
 import com.alexlogvin.blockieseconomy.price.PriceEngine;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,12 +34,14 @@ public final class EconomyManager {
     private final TransactionLog log;
 
     /**
-     * Called after any balance change so the owner can flag the save data dirty.
+     * Called after any balance change, with the player whose balance moved.
      *
      * <p>A callback rather than a direct call into BalancePersistence: that class is
-     * version-specific and owns state this class has no business knowing about.
+     * version-specific and owns state this class has no business knowing about. The owner
+     * uses it to flag the save data dirty and to push the new balance to that one client,
+     * which is why the player is passed rather than left for the listener to guess.
      */
-    private Runnable onBalanceChanged = () -> { };
+    private java.util.function.Consumer<ServerPlayer> onBalanceChanged = player -> { };
 
     public EconomyManager(ConfigManager config, PriceEngine prices, GameAdapter adapter) {
         this.config = config;
@@ -53,8 +54,8 @@ public final class EconomyManager {
         this.log = new TransactionLog(config.server().transactionLog());
     }
 
-    public void setBalanceChangeListener(Runnable listener) {
-        this.onBalanceChanged = listener == null ? () -> { } : listener;
+    public void setBalanceChangeListener(java.util.function.Consumer<ServerPlayer> listener) {
+        this.onBalanceChanged = listener == null ? player -> { } : listener;
     }
 
     public Ledger ledger() {
@@ -101,7 +102,7 @@ public final class EconomyManager {
         int dropped = deliver(player, item, count);
         log.record(player.getUUID(), player.getGameProfile().getName(), charged,
                 "buy " + count + "x " + itemId);
-        markDirty(player.getServer());
+        markDirty(player);
 
         return TradeOutcome.ok(itemId, count, total, charged.balanceAfter(), dropped);
     }
@@ -187,7 +188,7 @@ public final class EconomyManager {
 
         log.record(player.getUUID(), player.getGameProfile().getName(), paid,
                 "sell " + count + "x " + itemId);
-        markDirty(player.getServer());
+        markDirty(player);
 
         return TradeOutcome.ok(itemId, count, total, paid.balanceAfter(), 0);
     }
@@ -266,7 +267,7 @@ public final class EconomyManager {
         TransactionResult result = ledger.applyDeathPenalty(player.getUUID(), penalty);
         if (result.succeeded()) {
             log.record(player.getUUID(), player.getGameProfile().getName(), result, "death");
-            markDirty(player.getServer());
+            markDirty(player);
         }
     }
 
@@ -279,7 +280,7 @@ public final class EconomyManager {
         if (result.succeeded()) {
             log.record(player.getUUID(), player.getGameProfile().getName(), result,
                     "advancement " + advancementId);
-            markDirty(player.getServer());
+            markDirty(player);
         }
     }
 
@@ -304,9 +305,9 @@ public final class EconomyManager {
         }
     }
 
-    private void markDirty(MinecraftServer server) {
+    private void markDirty(ServerPlayer player) {
         try {
-            onBalanceChanged.run();
+            onBalanceChanged.accept(player);
         } catch (RuntimeException e) {
             BlockiesEconomy.LOGGER.error("Could not mark balances dirty: {}", e.toString());
         }

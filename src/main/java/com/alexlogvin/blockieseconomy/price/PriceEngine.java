@@ -1,6 +1,7 @@
 package com.alexlogvin.blockieseconomy.price;
 
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
+import com.alexlogvin.blockieseconomy.api.BlockiesEconomyAPI;
 import com.alexlogvin.blockieseconomy.config.ConfigManager;
 import com.alexlogvin.blockieseconomy.config.PriceDeclarations;
 import com.alexlogvin.blockieseconomy.core.price.ArbitrageValidator;
@@ -221,7 +222,17 @@ public final class PriceEngine {
      */
     private MergedDeclarations merge(MinecraftServer server) {
         MergedDeclarations merged = new MergedDeclarations();
-        List<PriceDeclarations> sources = config.declarations();
+
+        // Precedence, highest first: the admin's prices.toml and prices.d drop-ins, then
+        // datapacks and mod jars, then anything registered through the Java API. Tag rules
+        // from all of them are applied afterwards, below every explicit item id.
+        List<PriceDeclarations> sources =
+                new ArrayList<PriceDeclarations>(config.declarations());
+        sources.addAll(DatapackPrices.load(server));
+        PriceDeclarations fromApi = BlockiesEconomyAPI.collect();
+        if (!fromApi.isEmpty()) {
+            sources.add(fromApi);
+        }
 
         // Pass 1: explicit item ids, in precedence order.
         for (int i = 0; i < sources.size(); i++) {

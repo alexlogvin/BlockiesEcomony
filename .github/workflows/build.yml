@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    # The pure-Java library carries the solver, the ledger and the wire format, and needs no
+    # Minecraft at all. Running it on its own gives a real answer in under a minute, rather
+    # than after twenty minutes of remapping.
+    name: Core tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+            25
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew :core:test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: core-test-report
+          path: core/build/reports/tests/test
+
+  jars:
+    name: ${{ matrix.node }}
+    needs: core
+    runs-on: ubuntu-latest
+    strategy:
+      # Every node is independent, so one loader breaking should still tell us about the
+      # other four rather than cancelling them.
+      fail-fast: false
+      matrix:
+        node:
+          - 1.20.1-fabric
+          - 1.20.1-forge
+          - 1.20.1-quilt
+          - 1.21.1-fabric
+          - 1.21.1-neoforge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+            25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build ${{ matrix.node }}
+        run: ./gradlew :${{ matrix.node }}:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.node }}
+          path: versions/${{ matrix.node }}/build/libs/*.jar
+          if-no-files-found: error

@@ -1,0 +1,32 @@
+# <Mod name> price pack for Blockies Economy
+#
+# Targets:  <mod> <version>, Minecraft <version>
+# Author:   <you>
+#
+# Install: drop this file in config/blockies_economy/prices.d/ and run /shop rebuild.
+#
+# Prices are whole Blockies. For scale, in the shipped vanilla table:
+#   stick 5, cobblestone 5, oak log 40, iron ingot 90, diamond 2500.
+#
+# Only declare items the solver cannot work out for itself — raw drops, mob drops,
+# loot-only items. Anything craftable from something priced here is derived.
+#
+# "" blacklists an item: it never appears in the shop at all.
+# A key starting with # is an item tag and prices every member at once.
+
+[raw_materials]
+# "<mod>:raw_example" = 55
+
+[mob_drops]
+# "<mod>:example_scale" = 120
+
+[loot_only]
+# "<mod>:ancient_relic" = 3000
+
+[blacklisted]
+# Creative-mode and debug items should never be purchasable.
+# "<mod>:creative_generator" = ""
+
+[tags]
+# One line here can price every metal a mod adds.
+# "#c:ingots/example" = 80

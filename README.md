@@ -36,6 +36,7 @@ items get sensible prices automatically.
 | `/shop rebuild` | OP 2 | Recompute all derived prices |
 | `/shop reload` | OP 2 | Re-read config files without restarting |
 | `/shop debug price <item>` | OP 2 | Explain how a price was derived |
+| `/shop debug export` | OP 2 | Write the whole price table to `generated/prices.csv` |
 
 `reload` re-reads files; `rebuild` recomputes derived data.
 
@@ -51,6 +52,7 @@ advancements.toml      advancement prize overrides
 whitelist.toml         optional; empty means no whitelist applies
 prices.d/              drop-in price add-ons, e.g. create.toml
 generated/prices.toml  machine-written output — do not edit
+generated/prices.csv   the same table as a spreadsheet, from /shop debug export
 ```
 
 Every file ships with explanatory comments. Setting a price to `""` blacklists that item.
@@ -68,27 +70,39 @@ profit — forever. Values over the ceiling are clamped at startup with a warnin
 ## For mod and pack authors
 
 You can price your own items **without depending on this mod**: ship a datapack file at
-`data/<your_namespace>/blockies_economy/prices.json`. See `docs/` for the schema, and
-`price-packs/` for ready-made price files for popular mods.
+`data/<your_namespace>/blockies_economy/prices.json`.
+
+- [Mod developer guide](docs/mod-developers.md) — datapack schema, the Java API, precedence
+- [Server admin guide](docs/admin-guide.md) — configuration, tag rules, balancing
+- [Price packs](price-packs/) — ready-made price files for popular mods, not bundled with the jar
 
 ## Supported versions
 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
-| 1.21.1 | planned | planned | planned | via Fabric jar |
-| 1.20.1 | planned | n/a | planned | planned |
+| 1.21.1 | yes | yes | deferred | use the Fabric jar |
+| 1.20.1 | yes | n/a | yes | yes |
+
+Forge on 1.21.x is deferred rather than abandoned: the build plugin cannot produce it yet. See
+[PLAN.md](PLAN.md) M16.3.
+
+On 1.20.1 the Quilt jar is the Fabric jar with Quilt metadata — Quilt's own API stack was retired
+in 2025, so there is no Quilt-native API left to target.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).
 
 ## Building
 
-The Gradle daemon is pinned to **Java 21** via `gradle/gradle-daemon-jvm.properties`, and each
-Minecraft version's compile toolchain (17 / 21 / 25) is provisioned automatically. You only need
-a working `JAVA_HOME` pointing at any JDK for the wrapper launcher itself.
+The Gradle daemon is pinned via `gradle/gradle-daemon-jvm.properties`, and each Minecraft version's
+compile toolchain (17 / 21 / 25) is provisioned automatically. `JAVA_HOME` must point at a JDK that
+still exists — the wrapper launcher checks it before Gradle gets a say, so a JDK that was
+uninstalled or upgraded in place stops the build with a confusing error.
 
 ```bash
-./gradlew build
+./gradlew build                       # every jar
+./gradlew :core:test                  # the pure-Java tests, no Minecraft needed
+scripts/build-release.sh --mc 1.20.1  # one version, collected in build/release/
 ```
 
 ## License

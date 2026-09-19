@@ -53,7 +53,7 @@ public final class ShopCommand {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("shop")
                 .executes(ctx -> showHelp(ctx, economy, adminLevel));
 
-        root.then(Commands.literal("ui").executes(ShopCommand::openUi));
+        root.then(Commands.literal("ui").executes(ctx -> openUi(ctx, economy)));
 
         root.then(Commands.literal("balance")
                 .executes(ctx -> ownBalance(ctx, economy))
@@ -168,16 +168,18 @@ public final class ShopCommand {
         return 1;
     }
 
-    private static int openUi(CommandContext<CommandSourceStack> ctx) {
-        // The screen lives client-side; this asks the client to open it. A vanilla client,
-        // or one without the mod, simply will not act on the request - hence the notice.
+    private static int openUi(CommandContext<CommandSourceStack> ctx, EconomyServer economy) {
+        // The screen lives client-side, so this asks the client to open it. A vanilla
+        // client has no channel to ask on, which is what the failure below reports.
         ServerPlayer player = ctx.getSource().getPlayer();
         if (player == null) {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_PLAYERS_ONLY));
             return 0;
         }
-        ctx.getSource().sendSuccess(
-                () -> Component.translatable(Lang.ERROR_CLIENT_REQUIRED), false);
+        if (!economy.requestOpenShop(player)) {
+            ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_CLIENT_REQUIRED));
+            return 0;
+        }
         return 1;
     }
 
@@ -270,6 +272,7 @@ public final class ShopCommand {
         ctx.getSource().sendSuccess(() -> Component.translatable(key, name,
                 MoneyText.fullForm(amount), MoneyText.fullForm(after)), true);
         economy.markBalancesDirty();
+        economy.syncBalance(uuid);
         return 1;
     }
 

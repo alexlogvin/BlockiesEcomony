@@ -1,0 +1,74 @@
+package com.alexlogvin.blockieseconomy.neoforge;
+
+import com.alexlogvin.blockieseconomy.BlockiesEconomy;
+import com.alexlogvin.blockieseconomy.Lang;
+import com.alexlogvin.blockieseconomy.client.BalanceHud;
+import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.common.NeoForge;
+
+/**
+ * NeoForge client wiring.
+ *
+ * <p>Loaded only when {@code FMLEnvironment.dist} is the client, from the mod constructor.
+ * Nothing in the shared entry point may reference this class, because everything it touches
+ * is absent on a dedicated server.
+ */
+public final class NeoForgeClient {
+
+    private static KeyMapping openShop;
+
+    private NeoForgeClient() {
+    }
+
+    public static void init(IEventBus modBus) {
+        modBus.addListener(NeoForgeClient::onRegisterKeyMappings);
+        modBus.addListener(NeoForgeClient::onRegisterGuiLayers);
+
+        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> {
+            // consumeClick drains a queue rather than reading a held state, so it has to be
+            // polled every tick or presses arrive late.
+            while (openShop != null && openShop.consumeClick()) {
+                ClientHooks.openShop();
+            }
+        });
+
+        NeoForge.EVENT_BUS.addListener(
+                (ClientPlayerNetworkEvent.LoggingIn event) -> ClientHooks.onJoinWorld());
+        NeoForge.EVENT_BUS.addListener(
+                (ClientPlayerNetworkEvent.LoggingOut event) -> ClientHooks.onLeaveWorld());
+
+        ClientHooks.init();
+    }
+
+    private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+        openShop = new KeyMapping(Lang.KEY_OPEN_SHOP, InputConstants.Type.KEYSYM,
+                InputConstants.KEY_PERIOD, Lang.KEY_CATEGORY);
+        event.register(openShop);
+    }
+
+    /**
+     * Adds the balance as its own GUI layer.
+     *
+     * <p>A layer rather than a render event so it sits in the normal HUD stack and is
+     * hidden by F1 along with everything else, without this mod having to check for it.
+     */
+    private static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
+        event.registerAboveAll(
+                ResourceLocation.fromNamespaceAndPath(BlockiesEconomy.MOD_ID, "balance"),
+                (graphics, deltaTracker) -> BalanceHud.render(graphics));
+    }
+
+    /** True when this side has a client at all. */
+    public static boolean isClient(Dist dist) {
+        return dist.isClient();
+    }
+}

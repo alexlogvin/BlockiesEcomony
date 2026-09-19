@@ -76,6 +76,33 @@ public final class Lang {
     // ---- advancements ----
     public static final String ADVANCEMENT_REWARD = PREFIX + "advancement.reward";
 
+    // ---- shop screen ----
+    public static final String SHOP_TITLE = PREFIX + "shop.title";
+    public static final String SHOP_SEARCH = PREFIX + "shop.search";
+    public static final String SHOP_AMOUNT = PREFIX + "shop.amount";
+    public static final String SHOP_BUY = PREFIX + "shop.buy";
+    public static final String SHOP_SELL = PREFIX + "shop.sell";
+    public static final String SHOP_MAX_BUY = PREFIX + "shop.max_buy";
+    public static final String SHOP_MAX_SELL = PREFIX + "shop.max_sell";
+    public static final String SHOP_UNIT_BUY = PREFIX + "shop.unit_buy";
+    public static final String SHOP_UNIT_SELL = PREFIX + "shop.unit_sell";
+    public static final String SHOP_NO_SELECTION = PREFIX + "shop.no_selection";
+    public static final String SHOP_NO_MATCHES = PREFIX + "shop.no_matches";
+    public static final String SHOP_NOT_CONNECTED = PREFIX + "shop.not_connected";
+    public static final String SHOP_FILTER_ALL = PREFIX + "shop.filter.all";
+    public static final String SHOP_SORT_ID = PREFIX + "shop.sort.id";
+    public static final String SHOP_SORT_NAME = PREFIX + "shop.sort.name";
+    public static final String SHOP_SORT_PRICE_ASC = PREFIX + "shop.sort.price_asc";
+    public static final String SHOP_SORT_PRICE_DESC = PREFIX + "shop.sort.price_desc";
+    public static final String SHOP_PIN_HINT = PREFIX + "shop.pin_hint";
+    public static final String SHOP_RESULT_BOUGHT = PREFIX + "shop.result.bought";
+    public static final String SHOP_RESULT_SOLD = PREFIX + "shop.result.sold";
+    public static final String SHOP_RESULT_DROPPED = PREFIX + "shop.result.dropped";
+
+    // ---- keybind ----
+    public static final String KEY_OPEN_SHOP = "key.blockies_economy.open_shop";
+    public static final String KEY_CATEGORY = "key.categories.blockies_economy";
+
     // ---- errors ----
     public static final String ERROR_NOT_READY = ERR + "not_ready";
     public static final String ERROR_NOT_TRADEABLE = ERR + "not_tradeable";

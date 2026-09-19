@@ -11,9 +11,10 @@ import com.alexlogvin.blockieseconomy.core.money.MoneyFormat;
  *
  * <p>The client renders its own HUD and shop text through
  * {@link com.alexlogvin.blockieseconomy.core.money.MoneyFormat.Labels} backed by the
- * active language, so numbers shown in the UI <em>are</em> localised. That lives in the
- * client source set, where referencing {@code net.minecraft.client} is safe — doing it
- * from here would risk tripping side-stripping on Forge and NeoForge.
+ * active language, so numbers shown in the UI <em>are</em> localised. That lives in
+ * {@code ClientMoneyText}, in the client package, which only client-side entry points ever
+ * reference — a dedicated server has no {@code net.minecraft.client} classes to link against,
+ * so loading it there would fail.
  */
 public final class MoneyText {
 

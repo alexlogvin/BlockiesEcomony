@@ -13,6 +13,15 @@ public final class Services {
 
     public static final Platform PLATFORM = load(Platform.class);
 
+    /**
+     * The loader's networking, resolved once.
+     *
+     * <p>Cached rather than loaded on demand because the implementations hold registered
+     * handlers. A fresh ServiceLoader instance per call would hand out an empty one that
+     * silently drops every packet.
+     */
+    public static final Networking NETWORKING = load(Networking.class);
+
     private Services() {
     }
 

@@ -65,6 +65,28 @@
   "blockies_economy.error.leaderboard_disabled": "На цьому сервері таблиця лідерів доступна лише операторам.",
   "blockies_economy.error.client_required": "Екран крамниці потребує встановленого Blockies Economy на вашому клієнті. Скористайтеся /shop buy та /shop sell.",
 
+
+  "blockies_economy.shop.title": "Крамниця",
+  "blockies_economy.shop.search": "Пошук",
+  "blockies_economy.shop.amount": "Кількість",
+  "blockies_economy.shop.buy": "Купити",
+  "blockies_economy.shop.sell": "Продати",
+  "blockies_economy.shop.max_buy": "Макс. купівля",
+  "blockies_economy.shop.max_sell": "Макс. продаж",
+  "blockies_economy.shop.unit_buy": "Купівля: %s за шт.",
+  "blockies_economy.shop.unit_sell": "Продаж: %s за шт.",
+  "blockies_economy.shop.no_selection": "Предмет не вибрано. Натисніть на будь-який вище.",
+  "blockies_economy.shop.no_matches": "За цим запитом нічого не знайдено.",
+  "blockies_economy.shop.not_connected": "Очікування цін від сервера...",
+  "blockies_economy.shop.filter.all": "Усі моди",
+  "blockies_economy.shop.sort.id": "Сорт.: ID",
+  "blockies_economy.shop.sort.name": "Сорт.: назва",
+  "blockies_economy.shop.sort.price_asc": "Сорт.: дешевші",
+  "blockies_economy.shop.sort.price_desc": "Сорт.: дорожчі",
+  "blockies_economy.shop.pin_hint": "Права кнопка — закріпити",
+  "blockies_economy.shop.result.bought": "Куплено %1$s за %2$s Blockies.",
+  "blockies_economy.shop.result.sold": "Продано %1$s за %2$s Blockies.",
+  "blockies_economy.shop.result.dropped": "Куплено %1$s за %2$s Blockies. %3$s випало під ноги.",
   "key.categories.blockies_economy": "Blockies Economy",
   "key.blockies_economy.open_shop": "Відкрити крамницю"
 }

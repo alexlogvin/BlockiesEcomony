@@ -65,6 +65,28 @@
   "blockies_economy.error.leaderboard_disabled": "The leaderboard is only available to operators on this server.",
   "blockies_economy.error.client_required": "The shop screen needs Blockies Economy installed on your client. Use /shop buy and /shop sell instead.",
 
+
+  "blockies_economy.shop.title": "Shop",
+  "blockies_economy.shop.search": "Search",
+  "blockies_economy.shop.amount": "Amount",
+  "blockies_economy.shop.buy": "Buy",
+  "blockies_economy.shop.sell": "Sell",
+  "blockies_economy.shop.max_buy": "Max buy",
+  "blockies_economy.shop.max_sell": "Max sell",
+  "blockies_economy.shop.unit_buy": "Buy: %s each",
+  "blockies_economy.shop.unit_sell": "Sell: %s each",
+  "blockies_economy.shop.no_selection": "No item selected. Click one above.",
+  "blockies_economy.shop.no_matches": "Nothing matches that search.",
+  "blockies_economy.shop.not_connected": "Waiting for prices from the server...",
+  "blockies_economy.shop.filter.all": "All mods",
+  "blockies_economy.shop.sort.id": "Sort: ID",
+  "blockies_economy.shop.sort.name": "Sort: Name",
+  "blockies_economy.shop.sort.price_asc": "Sort: Cheapest",
+  "blockies_economy.shop.sort.price_desc": "Sort: Priciest",
+  "blockies_economy.shop.pin_hint": "Right-click to pin",
+  "blockies_economy.shop.result.bought": "Bought %1$s for %2$s Blockies.",
+  "blockies_economy.shop.result.sold": "Sold %1$s for %2$s Blockies.",
+  "blockies_economy.shop.result.dropped": "Bought %1$s for %2$s Blockies. %3$s dropped at your feet.",
   "key.categories.blockies_economy": "Blockies Economy",
   "key.blockies_economy.open_shop": "Open shop"
 }

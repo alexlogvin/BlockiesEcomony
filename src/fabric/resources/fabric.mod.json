@@ -17,7 +17,8 @@
     "blockies_economy.mixins.json"
   ],
   "entrypoints": {
-    "main": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabric"]
+    "main": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabric"],
+    "client": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabricClient"]
   },
   "depends": {
     "fabricloader": ">=0.15.0",

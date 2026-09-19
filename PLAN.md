@@ -249,8 +249,8 @@ default_recipe_multiplier = 1.3
 
 ### M5 — Price engine (Minecraft side)
 - [x] 5.1 `RecipeView`/`IngredientView` adapters over the real `RecipeManager`, version-gated
-- [ ] 5.2 Datapack price source: reload listener reading `data/<ns>/blockies_economy/prices.json` from every pack and mod jar
-- [ ] 5.3 Java API surface (`BlockiesEconomyAPI`) + ServiceLoader entrypoint for mod-dev registrations
+- [x] 5.2 Datapack price source: read from the server resource manager at build time (not a registered reload listener — the rebuild already runs after a reload, and listener ordering against the recipe manager is exactly the kind of thing that fails silently) reading `data/<ns>/blockies_economy/prices.json` from every pack and mod jar
+- [x] 5.3 Java API surface (`BlockiesEconomyAPI`) + ServiceLoader entrypoint for mod-dev registrations
 - [x] 5.4 Full build on server start and datapack reload, writing generated/prices.toml with a schema version; /shop rebuild recomputes. Runs async with a "prices not ready" guard on `SERVER_STARTED` and on `/reload`, writing `generated/prices.toml` with a **schema version**; `/shop rebuild` recomputes. Runs **async** off the server thread, with trades rejected by a "prices not ready" guard until it finishes — a 10k-item modpack must not stall world load
 - [x] 5.5 Precedence merge, blacklist/whitelist application, unpriced-item exclusion
 - [x] 5.5b **Tag rules** — resolve `"#c:ingots" = 90` style entries against the item tag registry, ranked below the Java API and above recipe derivation. Log which tags matched how many items so admins can see the blast radius
@@ -332,25 +332,25 @@ run tasks of its own, only puts a source set on the dev mod path when it is decl
 classes directory rather than the merged jar. None of these is visible to `./gradlew build`.
 
 ### M8 — Networking & client cache
-- [ ] 8.1 Packet abstraction over the `FriendlyByteBuf` ↔ `CustomPacketPayload` split
-- [ ] 8.2 S2C price table: compressed, content-hashed, disk-cached client-side; C2S hash check on join returns unchanged/delta/full
-- [ ] 8.3 S2C balance sync; C2S buy/sell requests; S2C transaction results
-- [ ] 8.4 Netty-thread safety: every world/state mutation queued onto the server thread
+- [x] 8.1 Packet abstraction over the `FriendlyByteBuf` ↔ `CustomPacketPayload` split
+- [x] 8.2 S2C price table: compressed, content-hashed, disk-cached client-side; C2S hash check on join returns unchanged/delta/full
+- [x] 8.3 S2C balance sync; C2S buy/sell requests; S2C transaction results
+- [x] 8.4 Netty-thread safety: every world/state mutation queued onto the server thread
 
 ### M9 — HUD
-- [ ] 9.1 Balance renderer: cobblestone icon (toggleable to `B`) + smart-formatted balance
-- [ ] 9.2 Nine anchors + pixel offset from client config
-- [ ] 9.3 Auto-hide when `Minecraft.getInstance().screen != null` or `options.hideGui` (F1); shown/hidden config mode
+- [x] 9.1 Balance renderer: cobblestone icon (toggleable to `B`) + smart-formatted balance
+- [x] 9.2 Nine anchors + pixel offset from client config
+- [x] 9.3 Auto-hide when `Minecraft.getInstance().screen != null` or `options.hideGui` (F1); shown/hidden config mode
 
 ### M10 — Shop GUI
-- [ ] 10.1 Vanilla-styled `Screen` — **not** an `AbstractContainerMenu`; buy/sell go over packets, so no Fabric/NeoForge menu-registration divergence
-- [ ] 10.2 Item grid: icon + buy/sell price per cell, scissored scrolling, name tooltip on hover, dimmed when un-buyable/un-sellable
-- [ ] 10.3 Search bar (`EditBox`), mod filter, sort by **ID (natural/JEI order)** / name / price asc / price desc
-- [ ] 10.4 Selection detail panel — "no item selected" when empty; otherwise: icon | name + unit buy/sell price | amount field with `1x`, `64x`, `max buy`, `max sell`, `+`, `-` | Buy/Sell buttons, disabled when impossible, with green `+240` above Sell and red `-300` above Buy
-- [ ] 10.5 Scroll-to-adjust on the amount column/field; Shift+scroll = ±64
-- [ ] 10.6 Favorites (right-click to pin, stored client-side)
-- [ ] 10.7 Keybind: Period (`.`) via standard `KeyMapping` so it is fully remappable in Controls
-- [ ] 10.8 Performance: precomputed filtered/sorted index, no per-frame allocation in the grid loop
+- [x] 10.1 Vanilla-styled `Screen` — **not** an `AbstractContainerMenu`; buy/sell go over packets, so no Fabric/NeoForge menu-registration divergence
+- [x] 10.2 Item grid: icon + buy/sell price per cell, scissored scrolling, name tooltip on hover, dimmed when un-buyable/un-sellable
+- [x] 10.3 Search bar (`EditBox`), mod filter, sort by **ID (natural/JEI order)** / name / price asc / price desc
+- [x] 10.4 Selection detail panel — "no item selected" when empty; otherwise: icon | name + unit buy/sell price | amount field with `1x`, `64x`, `max buy`, `max sell`, `+`, `-` | Buy/Sell buttons, disabled when impossible, with green `+240` above Sell and red `-300` above Buy
+- [x] 10.5 Scroll-to-adjust on the amount column/field; Shift+scroll = ±64
+- [x] 10.6 Favorites (right-click to pin, stored client-side)
+- [x] 10.7 Keybind: Period (`.`) via standard `KeyMapping` so it is fully remappable in Controls
+- [x] 10.8 Performance: precomputed filtered/sorted index, no per-frame allocation in the grid loop
 
 ### M11 — Advancements
 - [x] 11.1 Walk the advancement tree at startup — `Advancement#getParent/getChildren` on 1.20.1 vs `AdvancementTree`/`AdvancementNode` on 1.21.1 — and compute `base × 1.5^depth` per node
@@ -368,16 +368,16 @@ classes directory rather than the merged jar. None of these is visible to `./gra
 - [x] 13.2 `en_us.json`, `uk_ua.json`
 
 ### M14 — Release tooling
-- [ ] 14.1 `scripts/build-release.ps1` + `.sh` taking version and optional loader/MC filters, emitting `build/release/<modversion>/`
-- [ ] 14.2 Jar naming: `blockies_economy-<mc>-<loader>-<modversion>.jar`, fixed permanently
-- [ ] 14.3 GitHub Actions matrix over (loader × mc), `fail-fast: false`
+- [x] 14.1 `scripts/build-release.ps1` + `.sh` taking version and optional loader/MC filters, emitting `build/release/<modversion>/`
+- [x] 14.2 Jar naming: `blockies_economy-<mc>-<loader>-<modversion>.jar`, fixed permanently
+- [x] 14.3 GitHub Actions matrix over (loader × mc), `fail-fast: false`
 - [ ] 14.4 `mod-publish-plugin` wired to Modrinth + CurseForge, driven by repo secrets, so a tag push releases
 - [ ] 14.5 Final `./gradlew build` across the whole matrix
 
 ### M15 — Docs
 - [ ] 15.1 `README.md` — install, commands, config overview
-- [ ] 15.2 `docs/` GitHub Pages: admin config guide, **mod-dev price declaration guide** (datapack JSON schema + Java API), price-pack download index
-- [ ] 15.3 `price-packs/` folder with a template and 1–2 worked examples
+- [x] 15.2 `docs/` GitHub Pages: admin config guide, **mod-dev price declaration guide** (datapack JSON schema + Java API), price-pack download index
+- [x] 15.3 `price-packs/` folder with a template and 1–2 worked examples
 
 ### M16 — Expansion (post-v1)
 - [ ] 16.1 Add node `1.21.11`
