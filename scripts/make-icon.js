@@ -122,8 +122,10 @@ function drawCoin(size, blobCount, glyph, glyphScale, rimWidth) {
 
   const gw = glyph[0].length * glyphScale;
   const gh = glyph.length * glyphScale;
-  const gx = Math.round(c - gw / 2) + 1;
-  const gy = Math.round(c - gh / 2) + 1;
+  // No fudge factor here. These used to carry a "+ 1" that pushed the letter a pixel down
+  // and right of the coin it sits on, which is visible at every size.
+  const gx = Math.round(c - gw / 2);
+  const gy = Math.round(c - gh / 2);
   const shadow = Math.max(1, Math.round(glyphScale / 2));
 
   const stamp = (dx, dy, colour) => {
