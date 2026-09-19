@@ -379,10 +379,14 @@ public final class ShopScreen extends Screen {
 
     private static Item resolve(String itemId) {
         ResourceLocation location = ResourceLocation.tryParse(itemId);
-        if (location == null || !BuiltInRegistries.ITEM.containsKey(location)) {
+        if (location == null) {
             return null;
         }
-        return BuiltInRegistries.ITEM.get(location);
+        // getOptional rather than get: `get` hands back the item itself up to 1.21.1 and
+        // an Optional<Holder.Reference<Item>> from 1.21.2, so no one call site can serve
+        // both eras. getOptional keeps the same signature and meaning on every version this
+        // mod targets, and folds in the containsKey check that used to guard this.
+        return BuiltInRegistries.ITEM.getOptional(location).orElse(null);
     }
 
     private Entry selectedEntry() {

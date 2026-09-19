@@ -6,7 +6,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.AdvancementEvent;
@@ -20,7 +19,7 @@ public final class NeoForgeServerEvents implements ServerEvents {
     /**
      * The running server, captured at start.
      *
-     * <p>Needed because {@code AddReloadListenerEvent} does not carry it, and the reload
+     * <p>Needed because the reload event does not carry it, and the reload
      * handler has to be told which server reloaded.
      */
     private static volatile MinecraftServer server;
@@ -43,8 +42,9 @@ public final class NeoForgeServerEvents implements ServerEvents {
 
     @Override
     public void onDataPackReload(Consumer<MinecraftServer> handler) {
-        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) ->
-                event.addListener(new ReloadHook(handler)));
+        // Through ReloadListeners, which is per-era: NeoForge renamed this event and gave
+        // it a different addListener in 21.4.
+        ReloadListeners.onDataPackReload(new ReloadHook(handler));
     }
 
     @Override

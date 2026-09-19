@@ -40,12 +40,11 @@ public final class CoinIcon {
     /**
      * Draws the coin at {@code size} pixels square.
      *
-     * <p>Uses the blit overload that takes the destination size separately from the source
-     * region — the only one that will put a 32-pixel texture into a smaller box — and it
-     * has the same signature on every version this mod targets.
+     * <p>Through {@link IconBlit} because the blit that scales a 32-pixel texture into a
+     * smaller box was resignatured in 1.21.2. That is the only line of this class that
+     * differs by version, so it is the only line that forks.
      */
     public static void draw(GuiGraphics graphics, int x, int y, int size) {
-        graphics.blit(TEXTURE, x, y, size, size, 0.0F, 0.0F,
-                TEXTURE_SIZE, TEXTURE_SIZE, TEXTURE_SIZE, TEXTURE_SIZE);
+        IconBlit.draw(graphics, TEXTURE, x, y, size, TEXTURE_SIZE);
     }
 }
