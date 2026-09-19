@@ -26,7 +26,7 @@ import net.minecraft.util.thread.BlockableEventLoop;
 public final class FabricNetworking implements Networking {
 
     private static final ResourceLocation CHANNEL =
-            new ResourceLocation(BlockiesEconomy.MOD_ID, "main");
+            ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":main");
 
     private final Map<String, ServerHandler> serverHandlers =
             new HashMap<String, ServerHandler>();

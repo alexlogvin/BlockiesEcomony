@@ -15,8 +15,7 @@ import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * Forge client wiring (Minecraft 1.20.1).
@@ -32,8 +31,8 @@ public final class ForgeClient {
     private ForgeClient() {
     }
 
-    public static void init(IEventBus modBus) {
-        modBus.addListener(ForgeClient::onRegisterKeyMappings);
+    public static void init(FMLJavaModLoadingContext context) {
+        context.getModEventBus().addListener(ForgeClient::onRegisterKeyMappings);
 
         MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent event) -> {
             if (event.phase != TickEvent.Phase.END) {
@@ -64,7 +63,7 @@ public final class ForgeClient {
         MinecraftForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingOut event) -> ClientHooks.onLeaveWorld());
 
-        registerConfigScreen();
+        registerConfigScreen(context);
 
         ClientHooks.init();
     }
@@ -76,8 +75,10 @@ public final class ForgeClient {
      * this is the whole integration: hand it something that builds a Screen and the button
      * that was greyed out becomes live.
      */
-    private static void registerConfigScreen() {
-        ModLoadingContext.get().registerExtensionPoint(
+    private static void registerConfigScreen(FMLJavaModLoadingContext context) {
+        // Through the injected context, not ModLoadingContext.get(): the static accessor
+        // is a thread local that Forge has deprecated for removal.
+        context.registerExtensionPoint(
                 ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
                         (minecraft, parent) -> new ConfigScreen(parent)));

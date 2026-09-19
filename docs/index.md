@@ -11,7 +11,7 @@ get sensible prices without anyone pricing them.
   ruin your economy, and how to balance prices with a spreadsheet.
 - **[Mod developer guide](mod-developers.md)** — price your own items with a datapack file, a
   service provider, or a direct call. No dependency on this mod required.
-- **[Price packs](https://github.com/alexlogvin/blockies-economy/tree/main/price-packs)** —
+- **[Price packs](https://github.com/alexlogvin/BlockiesEcomony/tree/main/price-packs)** —
   ready-made price files for popular mods. Not bundled with the jar: a server should not carry a
   thousand prices for mods it does not have.
 
@@ -33,5 +33,5 @@ profitable loop logged by name.
 
 ## Links
 
-- [Source and issues](https://github.com/alexlogvin/blockies-economy)
-- [MIT licence](https://github.com/alexlogvin/blockies-economy/blob/main/LICENSE)
+- [Source and issues](https://github.com/alexlogvin/BlockiesEcomony)
+- [MIT licence](https://github.com/alexlogvin/BlockiesEcomony/blob/main/LICENSE)

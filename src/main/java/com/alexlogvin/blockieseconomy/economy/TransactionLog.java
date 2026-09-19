@@ -31,7 +31,14 @@ public final class TransactionLog {
     private static final DateTimeFormatter TIMESTAMP =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
-    private final boolean enabled;
+    private boolean enabled;
+
+    /**
+     * Turns logging on or off without a new log object, so a config reload applies.
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public TransactionLog(boolean enabled) {
         this.enabled = enabled;

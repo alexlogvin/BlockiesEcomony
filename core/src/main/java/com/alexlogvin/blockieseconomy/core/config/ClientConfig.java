@@ -51,7 +51,7 @@ public final class ClientConfig {
         this.hudVisible = visible;
     }
 
-    /** True to draw a cobblestone sprite as the currency symbol, false for a plain B. */
+    /** True to draw the mod's coin icon as the currency symbol, false for a plain B. */
     public boolean showCurrencyIcon() {
         return showCurrencyIcon;
     }
@@ -125,7 +125,7 @@ public final class ClientConfig {
                 "Show the balance at all. It hides itself automatically whenever a",
                 "screen is open or the HUD is hidden with F1.");
         put(hud, "show_currency_icon", TomlValue.of(showCurrencyIcon),
-                "Draw a cobblestone icon as the currency symbol. False uses the letter B.");
+                "Draw the coin icon as the currency symbol. False uses the letter B.");
 
         TomlTable shop = doc.table(TABLE_SHOP);
         shop.comments().add("Shop screen preferences.");

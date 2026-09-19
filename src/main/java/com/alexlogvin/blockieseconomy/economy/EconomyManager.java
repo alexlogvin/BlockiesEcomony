@@ -54,6 +54,23 @@ public final class EconomyManager {
         this.log = new TransactionLog(config.server().transactionLog());
     }
 
+    /**
+     * Pushes the current config into the objects that hold a copy of it.
+     *
+     * <p>Called after every reload. The ledger, the rate limiter and the transaction log
+     * each read a few settings when they were built, and nothing updated them afterwards:
+     * changing starting_balance or a rate limit did nothing until the game restarted, and
+     * that was true of /shop reload long before there was a config screen to make it
+     * obvious. They are updated in place rather than rebuilt, because the ledger holds
+     * every balance in the game and the limiter holds the windows it is counting.
+     */
+    public void applyConfig() {
+        ledger.setStartingBalance(config.server().startingBalance());
+        ledger.rateLimiter().setLimits(config.server().tradesPerMinutePerPlayer(),
+                config.server().tradesPerMinuteGlobal());
+        log.setEnabled(config.server().transactionLog());
+    }
+
     public void setBalanceChangeListener(java.util.function.Consumer<ServerPlayer> listener) {
         this.onBalanceChanged = listener == null ? player -> { } : listener;
     }

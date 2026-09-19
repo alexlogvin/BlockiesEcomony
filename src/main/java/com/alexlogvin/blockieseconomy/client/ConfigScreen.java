@@ -21,52 +21,60 @@ import net.minecraft.network.chat.Component;
 /**
  * The settings screen behind the Config button in the loader's mod list.
  *
- * <p>Built the same way as {@link ShopScreen}, and for the same reasons: a plain
- * {@link Screen} that draws its own background and its own widgets, because
- * {@code Screen#render} gained a background call in 1.20.5 and {@code Screen.renderables}
- * is private on 1.20.1. One source file covers every loader and both Minecraft versions;
- * only the few lines that hand this screen to the mod list differ per loader.
+ * <p>Shaped like a vanilla settings screen rather than like a panel of this mod's own
+ * invention: the version's own background behind it, a centred title, one scrolling column
+ * of settings, and Done at the bottom. Players already know how this works, and a mod
+ * screen that looks like the game's is one less thing to learn.
  *
- * <p><b>Two sections, and when each is offered.</b> The client section is always there —
- * it is this player's own {@code client.toml} and nobody else's business. The server
- * section edits {@code server.toml}, which is the rules of whatever world is running, so
- * it is offered only when this player owns that file: on the title screen (where it is
- * the file their next single-player world will use) and in single player. Connected to a
- * remote server the tab is disabled rather than removed, with a line saying why — the file
- * is on the server's disk, unreachable from here, and letting a player edit a copy of it
- * would change settings that silently do nothing.
+ * <p><b>One list, two sections.</b> Client settings first, then Server, each under its own
+ * heading. Client is this player's own {@code client.toml}. Server edits {@code
+ * server.toml}, which is the rules of whatever world is running, so its controls appear
+ * only when this player owns that file — the title screen, where it is the file their next
+ * single-player world will use, and single player. Connected to a remote server the
+ * heading stays, with a line saying the settings live on the server, and no controls: the
+ * file is on the server's disk and editing a local copy of it would change nothing.
+ *
+ * <p>Still a plain {@link Screen} rather than a vanilla {@code OptionsSubScreen}. That
+ * class and its options list changed shape repeatedly across the versions this mod
+ * targets, while {@link Screen}, {@link Button} and {@link EditBox} did not, so one source
+ * file covers every loader and both Minecraft versions. The single call that does differ
+ * is the background, which lives in {@link ScreenBackground}.
  */
 public final class ConfigScreen extends Screen {
 
-    private static final int PANEL_WIDTH = 300;
-    // Sized so the tallest tab (eight server rows) comes to 236, which fits inside the
-    // 240-line logical screen Minecraft guarantees: its auto GUI scale never picks a
-    // factor that leaves less than 320x240 to draw in. Adding a ninth setting means
-    // giving this screen a scrolling list, not shaving another two pixels off a row.
-    private static final int ROW_HEIGHT = 20;
-    private static final int HEADER = 38;
-    private static final int FOOTER = 38;
-    private static final int VALUE_WIDTH = 96;
+    /** Content column width, matching the 310-wide block vanilla's options screens use. */
+    private static final int CONTENT_WIDTH = 310;
+    private static final int CONTROL_WIDTH = 100;
+    // Every line is exactly one row tall, headings included, and the view is snapped to a
+    // whole number of rows below. That makes every scroll position land on a row boundary,
+    // so a row is always entirely present or entirely absent - never a label with its
+    // control clipped away, which is what a free-scrolling list did here.
+    private static final int ROW_HEIGHT = 24;
+    private static final int HEADING_HEIGHT = ROW_HEIGHT;
+    private static final int CONTROL_HEIGHT = 20;
 
-    private static final int COLOUR_TITLE = 0xFFFFFF;
-    private static final int COLOUR_LABEL = 0xC0C0C0;
+    /** Where the scrolling region starts and stops, leaving room for title and Done. */
+    private static final int LIST_TOP = 32;
+    private static final int LIST_BOTTOM_MARGIN = 40;
+
+    private static final int COLOUR_LABEL = 0xFFFFFF;
+    private static final int COLOUR_HEADING = 0xFFD98B;
     private static final int COLOUR_NOTE = 0xA0A0A0;
     private static final int COLOUR_SAVED = 0x60E060;
     private static final int COLOUR_CLAMPED = 0xFFD060;
-    private static final int COLOUR_PANEL = 0xF0100010;
-    private static final int COLOUR_BORDER = 0x50FFFFFF;
+    private static final int SCROLLBAR_WIDTH = 4;
 
     /** How long the "saved" line stays up, in client ticks. */
     private static final int SAVED_TICKS = 60;
 
     private final Screen parent;
     private final List<AbstractWidget> widgets = new ArrayList<AbstractWidget>();
-    private final List<Row> rows = new ArrayList<Row>();
+    private final List<Entry> entries = new ArrayList<Entry>();
 
-    private boolean serverTab;
     private boolean clientDirty;
     private boolean serverDirty;
     private int savedFor;
+    private int scroll;
 
     /**
      * True when a save had to be corrected on the way back in, so the screen can say so
@@ -75,12 +83,12 @@ public final class ConfigScreen extends Screen {
     private boolean clamped;
 
     /**
-     * The Save button, kept so { #tick} can re-enable it.
+     * The Save button, kept so {@link #tick} can re-enable it.
      *
      * <p>Needed because a value changes through an EditBox responder long after init()
      * decided whether the button was active. Without this the button stays greyed while
      * the field beside it plainly holds a new number, the same stale-widget bug the Sell
-     * button in { ShopScreen} had, fixed the same way.
+     * button in {@link ShopScreen} had, fixed the same way.
      */
     private Button saveButton;
 
@@ -107,29 +115,71 @@ public final class ConfigScreen extends Screen {
         return economy == null ? null : economy.config();
     }
 
-    // ---- rows ------------------------------------------------------------------------
+    private ClientConfig clientConfig() {
+        ConfigManager manager = config();
+        return manager == null ? null : manager.client();
+    }
 
-    /** One setting: a label, a widget that edits it, and how to read the widget back. */
-    private static final class Row {
-        private final String labelKey;
-        private final AbstractWidget widget;
+    private ServerConfig serverConfig() {
+        ConfigManager manager = config();
+        return manager == null ? null : manager.server();
+    }
 
-        Row(String labelKey, AbstractWidget widget) {
-            this.labelKey = labelKey;
-            this.widget = widget;
+    // ---- the list --------------------------------------------------------------------
+
+    /**
+     * One line of the list: a heading, a plain note, or a setting with a control.
+     *
+     * <p>{@code contentY} is the line's position within the scrolling content, not on
+     * screen. {@link #layoutScroll} turns one into the other, so scrolling moves every row
+     * by changing a single number.
+     */
+    private static final class Entry {
+        private final Component text;
+        private final AbstractWidget control;
+        private final int height;
+        private final int colour;
+        // Carried as its own flag rather than inferred from the height or a null control:
+        // headings are now exactly one row tall, and the "settings live on the server"
+        // note is a control-less row that is not a heading. Both tests would be wrong.
+        private final boolean heading;
+        private int contentY;
+
+        Entry(Component text, AbstractWidget control, int height, int colour,
+              boolean heading) {
+            this.text = text;
+            this.control = control;
+            this.height = height;
+            this.colour = colour;
+            this.heading = heading;
         }
     }
 
-    private int panelHeight() {
-        return HEADER + Math.max(rows.size(), 1) * ROW_HEIGHT + FOOTER;
+    private int contentLeft() {
+        return (width - CONTENT_WIDTH) / 2;
     }
 
-    private int left() {
-        return (width - PANEL_WIDTH) / 2;
+    private int viewHeight() {
+        int available = height - LIST_BOTTOM_MARGIN - LIST_TOP;
+        // Rounded down to whole rows. See ROW_HEIGHT: this is what keeps every scroll
+        // position on a row boundary.
+        return Math.max(ROW_HEIGHT, available / ROW_HEIGHT * ROW_HEIGHT);
     }
 
-    private int top() {
-        return Math.max(4, (height - panelHeight()) / 2);
+    private int listBottom() {
+        return LIST_TOP + viewHeight();
+    }
+
+    private int contentHeight() {
+        int total = 0;
+        for (int i = 0; i < entries.size(); i++) {
+            total += entries.get(i).height;
+        }
+        return total;
+    }
+
+    private int maxScroll() {
+        return Math.max(0, contentHeight() - viewHeight());
     }
 
     // ---- lifecycle -------------------------------------------------------------------
@@ -139,69 +189,44 @@ public final class ConfigScreen extends Screen {
         // Cleared for the same reason ShopScreen clears its list: init runs again on every
         // window resize, and without this the screen draws two of everything afterwards.
         widgets.clear();
-        rows.clear();
+        entries.clear();
         saveButton = null;
 
-        if (serverTab && !serverEditable()) {
-            serverTab = false;
+        int x = contentLeft();
+
+        buildClientSection(x);
+        buildServerSection(x);
+
+        // Assigned once the list is complete, because a row's place depends on the height
+        // of everything above it.
+        int y = 0;
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            entry.contentY = y;
+            y += entry.height;
         }
+        scroll = Math.min(scroll, maxScroll());
 
-        int x = left();
-
-        // Rows are built before anything is positioned, because panelHeight() — and so
-        // top(), and so every y on this screen — is a function of how many rows there are.
-        // Reading top() while the list was still empty is what put the labels a hundred
-        // pixels above their own fields the first time this screen was drawn: init() laid
-        // out against an empty list and render() drew against a full one.
-        if (serverTab) {
-            buildServerRows(x);
-        } else {
-            buildClientRows(x);
-        }
-
-        int y = top();
-
-        Button clientTab = Button.builder(Component.translatable(Lang.CONFIG_TAB_CLIENT),
-                button -> switchTo(false)).bounds(x + 8, y + 18, 100, 18).build();
-        clientTab.active = serverTab;
-        track(clientTab);
-
-        Button serverTabButton = Button.builder(Component.translatable(Lang.CONFIG_TAB_SERVER),
-                button -> switchTo(true)).bounds(x + 112, y + 18, 100, 18).build();
-        // Disabled rather than hidden when connected to a server: a player who knows the
-        // tab exists should see that it is unavailable here, not wonder where it went.
-        serverTabButton.active = serverEditable() && !serverTab;
-        track(serverTabButton);
-
-        layoutRows(y);
-
-        // The footer band is FOOTER tall below the last row: a 9px note, then a 20px
-        // button row, laid out from the bottom so both stay inside the panel border.
-        int footerY = y + panelHeight() - 24;
-        if (serverTab) {
-            // The server tab gets its own Save, because saving there has a visible answer:
-            // the values are written, reloaded, and read back, and a multiplier that broke
-            // the arbitrage ceiling comes back corrected. Closing the screen saves too, but
-            // then there is nothing left to show the correction on.
+        int footerY = height - 28;
+        if (serverEditable()) {
+            // Save earns its own button here because saving has a visible answer: the
+            // values are written, reloaded and read back, and a multiplier that broke the
+            // arbitrage ceiling comes back corrected. Closing saves too, but then there is
+            // nothing left to show the correction on.
             saveButton = Button.builder(Component.translatable(Lang.CONFIG_SAVE), button -> {
                 save();
                 refreshLayout();
-            }).bounds(x + PANEL_WIDTH / 2 - 104, footerY, 100, 20).build();
+            }).bounds(width / 2 - 154, footerY, 150, CONTROL_HEIGHT).build();
             saveButton.active = serverDirty;
             track(saveButton);
             track(Button.builder(Component.translatable(Lang.CONFIG_DONE), button -> onClose())
-                    .bounds(x + PANEL_WIDTH / 2 + 4, footerY, 100, 20).build());
+                    .bounds(width / 2 + 4, footerY, 150, CONTROL_HEIGHT).build());
         } else {
             track(Button.builder(Component.translatable(Lang.CONFIG_DONE), button -> onClose())
-                    .bounds(x + PANEL_WIDTH / 2 - 50, footerY, 100, 20).build());
+                    .bounds(width / 2 - 100, footerY, 200, CONTROL_HEIGHT).build());
         }
-    }
 
-    private void switchTo(boolean server) {
-        // Saved before the widgets holding the values are thrown away by init().
-        save();
-        serverTab = server;
-        refreshLayout();
+        layoutScroll();
     }
 
     /**
@@ -215,14 +240,13 @@ public final class ConfigScreen extends Screen {
      * {@link Screen} and would be an accidental override.
      */
     private void refreshLayout() {
-        // clearWidgets is the superclass's input registry; `widgets` is the draw list that
-        // init() refills. Both have to go, or input and drawing disagree about what is on
-        // screen.
         clearWidgets();
         init();
     }
 
-    private void buildClientRows(int x) {
+    private void buildClientSection(int x) {
+        heading(Lang.CONFIG_TAB_CLIENT);
+
         ClientConfig c = clientConfig();
         if (c == null) {
             return;
@@ -237,55 +261,123 @@ public final class ConfigScreen extends Screen {
             c.setAnchor(next);
             button.setMessage(Component.literal(next.name()));
             clientDirty = true;
-        }).bounds(valueX(x), 0, VALUE_WIDTH, 18).build();
-        addRow(Lang.CONFIG_HUD_ANCHOR, anchor);
+        }).bounds(controlX(x), 0, CONTROL_WIDTH, CONTROL_HEIGHT).build();
+        row(Lang.CONFIG_HUD_ANCHOR, anchor);
 
-        addRow(Lang.CONFIG_HUD_OFFSET_X, intBox(x, c.offsetX(),
+        row(Lang.CONFIG_HUD_OFFSET_X, intBox(x, c.offsetX(),
                 value -> c.setOffset(value, c.offsetY())));
-        addRow(Lang.CONFIG_HUD_OFFSET_Y, intBox(x, c.offsetY(),
+        row(Lang.CONFIG_HUD_OFFSET_Y, intBox(x, c.offsetY(),
                 value -> c.setOffset(c.offsetX(), value)));
 
-        addRow(Lang.CONFIG_HUD_VISIBLE, toggle(x, c.hudVisible(), value -> {
+        row(Lang.CONFIG_HUD_VISIBLE, toggle(x, c.hudVisible(), value -> {
             c.setHudVisible(value);
             clientDirty = true;
         }));
-        addRow(Lang.CONFIG_HUD_ICON, toggle(x, c.showCurrencyIcon(), value -> {
+        row(Lang.CONFIG_HUD_ICON, toggle(x, c.showCurrencyIcon(), value -> {
             c.setShowCurrencyIcon(value);
             clientDirty = true;
         }));
-        addRow(Lang.CONFIG_SHOP_TOOLTIPS, toggle(x, c.tooltipPrices(), value -> {
+        row(Lang.CONFIG_SHOP_TOOLTIPS, toggle(x, c.tooltipPrices(), value -> {
             c.setTooltipPrices(value);
             clientDirty = true;
         }));
-
     }
 
-    private void buildServerRows(int x) {
+    private void buildServerSection(int x) {
+        heading(Lang.CONFIG_TAB_SERVER);
+
+        if (!serverEditable()) {
+            // The heading stays so the section is not simply missing, but there is nothing
+            // to edit: this file lives on the server.
+            entries.add(new Entry(Component.translatable(Lang.CONFIG_SERVER_REMOTE),
+                    null, ROW_HEIGHT, COLOUR_NOTE, false));
+            return;
+        }
+
         ServerConfig s = serverConfig();
         if (s == null) {
             return;
         }
 
-        addRow(Lang.CONFIG_SELL_MULTIPLIER, doubleBox(x, s.sellMultiplier(),
+        row(Lang.CONFIG_SELL_MULTIPLIER, doubleBox(x, s.sellMultiplier(),
                 s::setSellMultiplier));
-        addRow(Lang.CONFIG_RECIPE_MULTIPLIER, doubleBox(x, s.defaultRecipeMultiplier(),
+        row(Lang.CONFIG_RECIPE_MULTIPLIER, doubleBox(x, s.defaultRecipeMultiplier(),
                 s::setDefaultRecipeMultiplier));
-        addRow(Lang.CONFIG_STARTING_BALANCE, longBox(x, s.startingBalance(),
+        row(Lang.CONFIG_STARTING_BALANCE, longBox(x, s.startingBalance(),
                 s::setStartingBalance));
-        addRow(Lang.CONFIG_DEATH_PENALTY, longBox(x, s.deathPenalty(), s::setDeathPenalty));
-        addRow(Lang.CONFIG_ADVANCEMENT_BASE, longBox(x, s.advancementBase(),
+        row(Lang.CONFIG_DEATH_PENALTY, longBox(x, s.deathPenalty(), s::setDeathPenalty));
+        row(Lang.CONFIG_ADVANCEMENT_BASE, longBox(x, s.advancementBase(),
                 s::setAdvancementBase));
-        addRow(Lang.CONFIG_ADVANCEMENT_EXPONENT, doubleBox(x, s.advancementExponent(),
+        row(Lang.CONFIG_ADVANCEMENT_EXPONENT, doubleBox(x, s.advancementExponent(),
                 s::setAdvancementExponent));
-        addRow(Lang.CONFIG_TRANSACTION_LOG, toggle(x, s.transactionLog(), value -> {
+        row(Lang.CONFIG_TRANSACTION_LOG, toggle(x, s.transactionLog(), value -> {
             s.setTransactionLog(value);
             serverDirty = true;
         }));
-        addRow(Lang.CONFIG_LEADERBOARD_PUBLIC, toggle(x, s.leaderboardPublic(), value -> {
+        row(Lang.CONFIG_LEADERBOARD_PUBLIC, toggle(x, s.leaderboardPublic(), value -> {
             s.setLeaderboardPublic(value);
             serverDirty = true;
         }));
+    }
 
+    private void heading(String key) {
+        entries.add(new Entry(Component.translatable(key), null, HEADING_HEIGHT,
+                COLOUR_HEADING, true));
+    }
+
+    private void row(String labelKey, AbstractWidget control) {
+        entries.add(new Entry(Component.translatable(labelKey), control, ROW_HEIGHT,
+                COLOUR_LABEL, false));
+        track(control);
+    }
+
+    private <T extends AbstractWidget> T track(T widget) {
+        widgets.add(widget);
+        return addWidget(widget);
+    }
+
+    // ---- scrolling -------------------------------------------------------------------
+
+    /**
+     * Puts every control where the current scroll position says it goes, and hides the
+     * ones that have left the view.
+     *
+     * <p>Hiding matters as much as moving: an invisible widget takes no clicks, so a field
+     * scrolled up behind the title cannot be typed into by clicking where it used to be.
+     */
+    private void layoutScroll() {
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            if (entry.control == null) {
+                continue;
+            }
+            int y = LIST_TOP + entry.contentY - scroll;
+            entry.control.setY(y + (ROW_HEIGHT - CONTROL_HEIGHT) / 2);
+            entry.control.visible = y >= LIST_TOP - 2
+                    && y + ROW_HEIGHT <= listBottom() + 2;
+        }
+    }
+
+    private void scrollBy(int amount) {
+        int before = scroll;
+        scroll = Math.max(0, Math.min(maxScroll(), scroll + amount));
+        if (scroll != before) {
+            layoutScroll();
+        }
+    }
+
+    // Declared in both the 1.20.1 and the 1.20.5+ shapes, without @Override on either, so
+    // one source file compiles against both. The version that is not the real override is
+    // simply never called.
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        scrollBy((int) (-delta * ROW_HEIGHT));
+        return true;
+    }
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX,
+                                 double scrollY) {
+        scrollBy((int) (-scrollY * ROW_HEIGHT));
+        return true;
     }
 
     // ---- widget factories ------------------------------------------------------------
@@ -306,8 +398,8 @@ public final class ConfigScreen extends Screen {
         void set(boolean value);
     }
 
-    private int valueX(int x) {
-        return x + PANEL_WIDTH - 8 - VALUE_WIDTH;
+    private int controlX(int x) {
+        return x + CONTENT_WIDTH - CONTROL_WIDTH;
     }
 
     /**
@@ -319,8 +411,11 @@ public final class ConfigScreen extends Screen {
      * the field unusable. The last parseable thing they typed is what gets saved.
      */
     private EditBox numberBox(int x, String initial, java.util.function.Consumer<String> onEdit) {
-        EditBox box = new EditBox(font, valueX(x), 0, VALUE_WIDTH, 18, Component.empty());
+        EditBox box = new EditBox(font, controlX(x), 0, CONTROL_WIDTH, CONTROL_HEIGHT,
+                Component.empty());
         box.setMaxLength(20);
+        // Set before the responder is attached, so loading a value does not mark the
+        // screen dirty and light up Save on a screen nobody has edited.
         box.setValue(initial);
         box.setResponder(onEdit);
         return box;
@@ -368,7 +463,7 @@ public final class ConfigScreen extends Screen {
             state[0] = !state[0];
             button.setMessage(onOff(state[0]));
             setter.set(state[0]);
-        }).bounds(valueX(x), 0, VALUE_WIDTH, 18).build();
+        }).bounds(controlX(x), 0, CONTROL_WIDTH, CONTROL_HEIGHT).build();
     }
 
     private static Component onOff(boolean value) {
@@ -382,33 +477,6 @@ public final class ConfigScreen extends Screen {
             text = text.substring(0, text.length() - 1);
         }
         return text;
-    }
-
-    private void addRow(String labelKey, AbstractWidget widget) {
-        rows.add(new Row(labelKey, widget));
-    }
-
-    private void layoutRows(int y) {
-        for (int i = 0; i < rows.size(); i++) {
-            Row row = rows.get(i);
-            row.widget.setY(y + HEADER + i * ROW_HEIGHT);
-            track(row.widget);
-        }
-    }
-
-    private <T extends AbstractWidget> T track(T widget) {
-        widgets.add(widget);
-        return addWidget(widget);
-    }
-
-    private ClientConfig clientConfig() {
-        ConfigManager manager = config();
-        return manager == null ? null : manager.client();
-    }
-
-    private ServerConfig serverConfig() {
-        ConfigManager manager = config();
-        return manager == null ? null : manager.server();
     }
 
     // ---- saving ----------------------------------------------------------------------
@@ -441,9 +509,9 @@ public final class ConfigScreen extends Screen {
             BlockiesEconomy.server().reloadConfig();
 
             // Ask the authority what the value actually came out as, rather than trusting
-            // what was typed. MultiplierTable owns the arbitrage ceiling, and it enforces
-            // it when the table is built, not on the stored number — so a markup of 2.0
-            // stays 2.0 in the config while the economy quietly runs on 1.333.
+            // what was typed. MultiplierTable enforces the arbitrage ceiling when the
+            // table is built, not on the stored number — so a markup of 2.0 stays 2.0 in
+            // the config while the economy quietly runs on 1.333.
             //
             // Writing the effective value back is the point. A config screen showing a
             // figure the economy is not using is the same failure as a shop quoting a
@@ -464,8 +532,8 @@ public final class ConfigScreen extends Screen {
             }
         }
 
-        // Only when something was actually written. Saying "Saved" for merely switching
-        // tabs would teach the player to ignore the one line that tells them their edit
+        // Only when something was actually written. Saying "Saved" for merely opening the
+        // screen would teach the player to ignore the one line that tells them their edit
         // landed.
         if (wrote) {
             savedFor = SAVED_TICKS;
@@ -492,57 +560,86 @@ public final class ConfigScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Drawn by hand for the same reason as ShopScreen: Screen#render gained a
-        // background call in 1.20.5 that would cover the panel, and renderBackground's
-        // signature changed with it.
-        graphics.fillGradient(0, 0, width, height, 0xC0101010, 0xD0101010);
+        // This version's own settings-screen background, rather than a panel of this mod's
+        // invention. Drawn here rather than delegated to Screen#render, which only calls it
+        // from 1.20.5 onwards and would also draw widgets this screen positions itself.
+        ScreenBackground.draw(this, graphics, mouseX, mouseY, partialTick);
 
-        int x = left();
-        int y = top();
-        panel(graphics, x, y, PANEL_WIDTH, panelHeight());
+        layoutScroll();
 
-        graphics.drawString(font, title, x + 8, y + 8, COLOUR_TITLE);
+        graphics.drawCenteredString(font, title, width / 2, 14, COLOUR_LABEL);
 
-        for (int i = 0; i < rows.size(); i++) {
-            Row row = rows.get(i);
-            graphics.drawString(font, Component.translatable(row.labelKey),
-                    x + 8, y + HEADER + i * ROW_HEIGHT + 5, COLOUR_LABEL);
+        int left = contentLeft();
+        // Clipped to the list area so a half-scrolled row is cut off cleanly instead of
+        // spilling over the title and the buttons.
+        graphics.enableScissor(left - 4, LIST_TOP, left + CONTENT_WIDTH + 4, listBottom());
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            int y = LIST_TOP + entry.contentY - scroll;
+            if (y + entry.height < LIST_TOP || y > listBottom()) {
+                continue;
+            }
+
+            if (entry.heading) {
+                graphics.drawString(font, entry.text, left, y + 8, entry.colour);
+                // A rule under the heading, the way vanilla separates a settings group.
+                graphics.fill(left, y + 20, left + CONTENT_WIDTH, y + 21, 0x40FFFFFF);
+            } else {
+                graphics.drawString(font, entry.text, left,
+                        y + (ROW_HEIGHT - font.lineHeight) / 2, entry.colour);
+            }
+
+            if (entry.control != null && entry.control.visible) {
+                entry.control.render(graphics, mouseX, mouseY, partialTick);
+            }
         }
+        graphics.disableScissor();
 
+        renderScrollbar(graphics, left);
+        renderFooterNote(graphics);
+
+        // The footer buttons sit outside the list, so they are drawn after the scissor is
+        // lifted and are never clipped by it.
         for (int i = 0; i < widgets.size(); i++) {
-            widgets.get(i).render(graphics, mouseX, mouseY, partialTick);
+            AbstractWidget widget = widgets.get(i);
+            if (!isInList(widget)) {
+                widget.render(graphics, mouseX, mouseY, partialTick);
+            }
         }
-
-        renderFooterNote(graphics, x, y);
     }
 
-    private void renderFooterNote(GuiGraphics graphics, int x, int y) {
-        int noteY = y + panelHeight() - 36;
+    private boolean isInList(AbstractWidget widget) {
+        for (int i = 0; i < entries.size(); i++) {
+            if (entries.get(i).control == widget) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        if (!serverEditable()) {
-            Component note = Component.translatable(Lang.CONFIG_SERVER_REMOTE);
-            graphics.drawString(font, note,
-                    x + PANEL_WIDTH / 2 - font.width(note) / 2, noteY, COLOUR_NOTE);
+    private void renderScrollbar(GuiGraphics graphics, int left) {
+        int max = maxScroll();
+        if (max <= 0) {
             return;
         }
+        int trackX = left + CONTENT_WIDTH + 6;
+        int trackHeight = viewHeight();
+        int thumbHeight = Math.max(16, trackHeight * trackHeight / contentHeight());
+        int thumbY = LIST_TOP + (trackHeight - thumbHeight) * scroll / max;
+
+        graphics.fill(trackX, LIST_TOP, trackX + SCROLLBAR_WIDTH, listBottom(), 0x40000000);
+        graphics.fill(trackX, thumbY, trackX + SCROLLBAR_WIDTH, thumbY + thumbHeight,
+                0xA0FFFFFF);
+    }
+
+    private void renderFooterNote(GuiGraphics graphics) {
+        int noteY = height - 40;
         if (clamped) {
-            Component note = Component.translatable(Lang.CONFIG_CLAMPED);
-            graphics.drawString(font, note,
-                    x + PANEL_WIDTH / 2 - font.width(note) / 2, noteY, COLOUR_CLAMPED);
-            return;
+            graphics.drawCenteredString(font, Component.translatable(Lang.CONFIG_CLAMPED),
+                    width / 2, noteY, COLOUR_CLAMPED);
+        } else if (savedFor > 0) {
+            graphics.drawCenteredString(font, Component.translatable(Lang.CONFIG_SAVED),
+                    width / 2, noteY, COLOUR_SAVED);
         }
-        if (savedFor > 0) {
-            Component note = Component.translatable(Lang.CONFIG_SAVED);
-            graphics.drawString(font, note,
-                    x + PANEL_WIDTH / 2 - font.width(note) / 2, noteY, COLOUR_SAVED);
-        }
-    }
-
-    private static void panel(GuiGraphics graphics, int x, int y, int w, int h) {
-        graphics.fill(x, y, x + w, y + h, COLOUR_PANEL);
-        graphics.fill(x, y, x + w, y + 1, COLOUR_BORDER);
-        graphics.fill(x, y + h - 1, x + w, y + h, COLOUR_BORDER);
-        graphics.fill(x, y, x + 1, y + h, COLOUR_BORDER);
-        graphics.fill(x + w - 1, y, x + w, y + h, COLOUR_BORDER);
     }
 }

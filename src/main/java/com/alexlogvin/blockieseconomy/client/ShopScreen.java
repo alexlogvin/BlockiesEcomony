@@ -24,8 +24,8 @@ import net.minecraft.world.item.ItemStack;
  * The shop.
  *
  * <p>A plain {@link Screen} rather than an {@code AbstractContainerMenu}, deliberately.
- * Nothing here moves items through slots — a purchase is a request the server validates and
- * fulfils — so a menu would buy nothing but the registration divergence between Fabric and
+ * Nothing here moves items through slots â a purchase is a request the server validates and
+ * fulfils â so a menu would buy nothing but the registration divergence between Fabric and
  * NeoForge, plus a synced container the client could be tempted to trust.
  *
  * <p>Everything shown is display state from {@link ClientShopState}. The totals under the
@@ -92,7 +92,7 @@ public final class ShopScreen extends Screen {
      * The widgets, in draw order.
      *
      * <p>Kept here rather than read back from {@code Screen.renderables}, which is private
-     * on 1.20.1 and protected later. This screen draws its widgets itself — see
+     * on 1.20.1 and protected later. This screen draws its widgets itself â see
      * {@link #render} for why it cannot let the superclass do it.
      */
     private final List<AbstractWidget> widgets = new ArrayList<AbstractWidget>();
@@ -314,7 +314,7 @@ public final class ShopScreen extends Screen {
             }
             Item item = resolve(itemId);
             if (item == null) {
-                // Priced by the server but absent here — a mod the server has and we do
+                // Priced by the server but absent here â a mod the server has and we do
                 // not. Listing it would show a missing-texture cube nobody can use.
                 continue;
             }
@@ -415,7 +415,7 @@ public final class ShopScreen extends Screen {
     /**
      * How many of the selected item the player appears to be holding.
      *
-     * <p>An estimate, and knowingly so. The server decides what is actually sellable — it
+     * <p>An estimate, and knowingly so. The server decides what is actually sellable â it
      * refuses anything with non-default components, which the client cannot check the same
      * way across versions. Enchanted stacks are excluded here because they are the common
      * case; anything else it gets wrong comes back as a refusal, not a wrong payment.
@@ -459,8 +459,8 @@ public final class ShopScreen extends Screen {
     /**
      * Keeps the buttons in step with things that change while the screen is open.
      *
-     * <p>A balance can move without the player touching the shop — an advancement pays out,
-     * or an operator adjusts it — and items can arrive in the inventory. Twenty times a
+     * <p>A balance can move without the player touching the shop â an advancement pays out,
+     * or an operator adjusts it â and items can arrive in the inventory. Twenty times a
      * second is cheap for a scan of forty-one slots and avoids a Buy button that claims the
      * player cannot afford something they now can.
      */
@@ -499,8 +499,11 @@ public final class ShopScreen extends Screen {
     }
 
     private void renderBalance(GuiGraphics graphics, int x, int y) {
+        // The exact figure, not the short form the HUD uses. This is the screen where a
+        // player decides what they can afford, and "4.9K" beside a 4,900-Blockie price is
+        // a number they have to do arithmetic on. The HUD is a glance; this is a decision.
         String text = ClientShopState.get().balanceKnown()
-                ? ClientMoneyText.shortForm(ClientShopState.get().balance()) + " "
+                ? ClientMoneyText.fullForm(ClientShopState.get().balance()) + " "
                         + ClientMoneyText.currency()
                 : "—";
         graphics.drawString(font, text, x + PANEL_WIDTH - 8 - font.width(text), y + 7,
@@ -595,8 +598,11 @@ public final class ShopScreen extends Screen {
         }
 
         graphics.renderItem(entry.stack, x, y);
-        graphics.drawString(font, entry.stack.getHoverName(), x + 22, y, COLOUR_TITLE);
-        graphics.drawString(font, entry.itemId, x + 22, y + 11, COLOUR_LABEL);
+        // Name only. The item id was here for identification, but the icon and the name
+        // already do that, and "minecraft:brown_stained_glass_pane" is a line of noise in
+        // the one panel the player reads before spending. It is still in the hover tooltip
+        // and in /shop price for anyone who needs it.
+        graphics.drawString(font, entry.stack.getHoverName(), x + 22, y + 4, COLOUR_TITLE);
 
         graphics.drawString(font,
                 Component.translatable(Lang.SHOP_UNIT_BUY,

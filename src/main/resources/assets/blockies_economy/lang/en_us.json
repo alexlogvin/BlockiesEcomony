@@ -101,7 +101,7 @@
   "blockies_economy.config.hud.offset_x": "Offset X",
   "blockies_economy.config.hud.offset_y": "Offset Y",
   "blockies_economy.config.hud.visible": "Show balance",
-  "blockies_economy.config.hud.icon": "Cobblestone icon",
+  "blockies_economy.config.hud.icon": "Currency icon",
   "blockies_economy.config.shop.tooltips": "Prices in tooltips",
   "blockies_economy.config.server.sell_multiplier": "Sell multiplier",
   "blockies_economy.config.server.recipe_multiplier": "Recipe markup",

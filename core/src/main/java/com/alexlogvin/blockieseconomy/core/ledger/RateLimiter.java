@@ -25,12 +25,23 @@ public final class RateLimiter {
 
     private static final long WINDOW_MILLIS = 60_000L;
 
-    private final int perPlayerLimit;
-    private final int globalLimit;
+    private int perPlayerLimit;
+    private int globalLimit;
     private final Map<UUID, Window> perPlayer = new HashMap<UUID, Window>();
     private final Window global = new Window();
 
     public RateLimiter(int perPlayerLimit, int globalLimit) {
+        this.perPlayerLimit = perPlayerLimit;
+        this.globalLimit = globalLimit;
+    }
+
+    /**
+     * Changes the limits in place.
+     *
+     * <p>So that a config reload applies without a new limiter, which would discard the
+     * windows it is currently counting and briefly let everyone trade without limit.
+     */
+    public void setLimits(int perPlayerLimit, int globalLimit) {
         this.perPlayerLimit = perPlayerLimit;
         this.globalLimit = globalLimit;
     }

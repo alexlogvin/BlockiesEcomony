@@ -5,8 +5,7 @@ import com.alexlogvin.blockieseconomy.core.config.ClientConfig;
 import com.alexlogvin.blockieseconomy.core.config.HudAnchor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * The balance readout drawn over the game.
@@ -23,8 +22,20 @@ public final class BalanceHud {
     private static final int GAP = 3;
     private static final int TEXT_COLOUR = 0xFFFFFF;
 
-    /** A cobblestone stack, built once: the HUD draws it every frame. */
-    private static final ItemStack ICON = new ItemStack(Items.COBBLESTONE);
+    /**
+     * The mod's own coin, the same artwork the mod list shows.
+     *
+     * <p>A texture rather than a rendered cobblestone item, which is what this used to be.
+     * An item has to go through the block model renderer every frame for a 16-pixel badge,
+     * and it is whatever the player's resource pack says cobblestone looks like, which may
+     * be anything at all. A flat texture is one quad, and it is recognisably this mod.
+     *
+     * <p>Built with tryParse rather than a constructor: the two-argument ResourceLocation
+     * constructor is deprecated on 1.20.1 and gone by 1.21, while tryParse is public on
+     * both. The id is a literal that cannot fail to parse.
+     */
+    private static final ResourceLocation ICON =
+            ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":textures/gui/coin.png");
 
     private BalanceHud() {
     }
@@ -48,7 +59,7 @@ public final class BalanceHud {
         int y = anchor.y(graphics.guiHeight(), height, MARGIN) + config.offsetY();
 
         if (icon) {
-            graphics.renderItem(ICON, x, y);
+            graphics.blit(ICON, x, y, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
         } else {
             graphics.drawString(minecraft.font, ClientMoneyText.currency(), x,
                     y + (height - minecraft.font.lineHeight) / 2, TEXT_COLOUR);

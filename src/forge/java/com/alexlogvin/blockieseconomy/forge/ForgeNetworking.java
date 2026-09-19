@@ -30,7 +30,7 @@ public final class ForgeNetworking implements Networking {
     private static final String PROTOCOL = "1";
 
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
-            .named(new ResourceLocation(BlockiesEconomy.MOD_ID, "main"))
+            .named(ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":main"))
             .networkProtocolVersion(() -> PROTOCOL)
             .clientAcceptedVersions(NetworkRegistry.acceptMissingOr(PROTOCOL))
             .serverAcceptedVersions(NetworkRegistry.acceptMissingOr(PROTOCOL))

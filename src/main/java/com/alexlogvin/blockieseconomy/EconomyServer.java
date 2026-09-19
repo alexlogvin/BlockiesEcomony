@@ -175,6 +175,10 @@ public final class EconomyServer {
     /** Reloads every config file. Prices are not rebuilt; that is {@code /shop rebuild}. */
     public void reloadConfig() {
         config.load();
+        // Not just re-reading the files: the ledger, rate limiter and transaction log each
+        // took a copy of their settings when they were built, so without this a reload
+        // changes the file and nothing else.
+        economy.applyConfig();
         BlockiesEconomy.LOGGER.info("Configuration reloaded.");
     }
 

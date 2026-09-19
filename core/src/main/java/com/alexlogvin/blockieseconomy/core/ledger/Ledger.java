@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Ledger {
 
     private final Map<UUID, Long> balances = new ConcurrentHashMap<UUID, Long>();
-    private final long startingBalance;
+    private long startingBalance;
     private final RateLimiter rateLimiter;
     private TransactionListener listener = TransactionListener.NONE;
 
@@ -53,6 +53,26 @@ public final class Ledger {
 
     public long startingBalance() {
         return startingBalance;
+    }
+
+    /**
+     * Changes what a player who has never traded starts with.
+     *
+     * <p>Settable, not final, so a config reload takes effect without rebuilding this
+     * object - rebuilding it would throw away every balance in the map. Only players with
+     * no record yet are affected; anyone who has already traded keeps what they have,
+     * which is the only sane reading of "starting balance".
+     */
+    public void setStartingBalance(long startingBalance) {
+        if (startingBalance < 0L) {
+            throw new IllegalArgumentException("starting balance cannot be negative");
+        }
+        this.startingBalance = startingBalance;
+    }
+
+    /** The rate limiter, so a config reload can push new limits into it. */
+    public RateLimiter rateLimiter() {
+        return rateLimiter;
     }
 
     /** A player who has never traded reads as the configured starting balance. */

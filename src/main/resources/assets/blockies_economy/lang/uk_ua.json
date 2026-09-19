@@ -101,7 +101,7 @@
   "blockies_economy.config.hud.offset_x": "Зсув X",
   "blockies_economy.config.hud.offset_y": "Зсув Y",
   "blockies_economy.config.hud.visible": "Показувати баланс",
-  "blockies_economy.config.hud.icon": "Іконка бруківки",
+  "blockies_economy.config.hud.icon": "Іконка валюти",
   "blockies_economy.config.shop.tooltips": "Ціни у підказках",
   "blockies_economy.config.server.sell_multiplier": "Множник продажу",
   "blockies_economy.config.server.recipe_multiplier": "Націнка за рецепт",
