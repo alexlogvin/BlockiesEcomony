@@ -98,6 +98,21 @@ public final class ConfigManager {
         TomlFiles.write(ConfigPaths.client(), client.toToml());
     }
 
+    /**
+     * Saves the server config after an in-game change from the config screen.
+     *
+     * <p><b>This rewrites {@code server.toml} in the mod's canonical shape.</b> Settings
+     * survive, including recipe multipliers the mod does not know about, but an admin's
+     * own comments and formatting do not — the file is regenerated, not patched. So the
+     * config screen calls this only when a value actually changed, and only ever on a
+     * single-player world, where the file belongs to the player sitting at the screen.
+     * On a real server, {@code server.toml} is the admin's document and the commands are
+     * the way in.
+     */
+    public void saveServer() {
+        TomlFiles.write(ConfigPaths.server(), server.toToml());
+    }
+
     private void writeDefaultsIfAbsent() {
         TomlFiles.writeIfAbsent(ConfigPaths.server(), new ServerConfig().toToml());
         TomlFiles.writeIfAbsent(ConfigPaths.client(), new ClientConfig().toToml());

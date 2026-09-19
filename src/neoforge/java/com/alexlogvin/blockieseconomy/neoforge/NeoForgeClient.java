@@ -4,16 +4,19 @@ import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.alexlogvin.blockieseconomy.client.ConfigScreen;
 import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -31,7 +34,14 @@ public final class NeoForgeClient {
     private NeoForgeClient() {
     }
 
-    public static void init(IEventBus modBus) {
+    public static void init(IEventBus modBus, ModContainer container) {
+        // Enables the Config button beside this mod in the Mods list. NeoForge keeps one
+        // extension point per mod container rather than a registry, so this is the whole
+        // integration: give it something that builds a Screen and the greyed-out button
+        // becomes live.
+        container.registerExtensionPoint(IConfigScreenFactory.class,
+                (owner, parent) -> new ConfigScreen(parent));
+
         modBus.addListener(NeoForgeClient::onRegisterKeyMappings);
         modBus.addListener(NeoForgeClient::onRegisterGuiLayers);
 

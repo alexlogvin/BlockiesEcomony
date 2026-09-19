@@ -62,6 +62,9 @@ repositories {
     mavenCentral()
     maven("https://maven.fabricmc.net/") { name = "Fabric" }
     maven("https://maven.parchmentmc.org/") { name = "ParchmentMC" }
+    // Mod Menu, for the Config button in its mod list. compileOnly only (below): the
+    // mod never requires it, and does nothing differently when it is absent.
+    maven("https://maven.terraformersmc.com/releases/") { name = "TerraformersMC" }
 }
 
 dependencies {
@@ -76,6 +79,13 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
+
+    // Fabric and Quilt have no mod-list config hook of their own; Mod Menu is what
+    // players install for one, and it asks for the screen through an entrypoint whose
+    // interface has to be on the compile classpath. compileOnly keeps it out of the jar
+    // and out of the dependency list, so a player without Mod Menu loses the button and
+    // nothing else; the Fabric entrypoint class is simply never loaded.
+    modCompileOnly("com.terraformersmc:modmenu:${property("deps.modmenu")}")
 
     implementation(project(":core"))
 }

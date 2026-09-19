@@ -99,6 +99,38 @@ public final class Lang {
     public static final String SHOP_RESULT_SOLD = PREFIX + "shop.result.sold";
     public static final String SHOP_RESULT_DROPPED = PREFIX + "shop.result.dropped";
 
+    // ---- config screen ----
+    public static final String CONFIG_TITLE = PREFIX + "config.title";
+    public static final String CONFIG_TAB_CLIENT = PREFIX + "config.tab.client";
+    public static final String CONFIG_TAB_SERVER = PREFIX + "config.tab.server";
+    public static final String CONFIG_SERVER_REMOTE = PREFIX + "config.server_remote";
+    public static final String CONFIG_SAVED = PREFIX + "config.saved";
+    public static final String CONFIG_CLAMPED = PREFIX + "config.clamped";
+    public static final String CONFIG_DONE = PREFIX + "config.done";
+    public static final String CONFIG_SAVE = PREFIX + "config.save";
+
+    public static final String CONFIG_HUD_ANCHOR = PREFIX + "config.hud.anchor";
+    public static final String CONFIG_HUD_OFFSET_X = PREFIX + "config.hud.offset_x";
+    public static final String CONFIG_HUD_OFFSET_Y = PREFIX + "config.hud.offset_y";
+    public static final String CONFIG_HUD_VISIBLE = PREFIX + "config.hud.visible";
+    public static final String CONFIG_HUD_ICON = PREFIX + "config.hud.icon";
+    public static final String CONFIG_SHOP_TOOLTIPS = PREFIX + "config.shop.tooltips";
+
+    public static final String CONFIG_SELL_MULTIPLIER = PREFIX + "config.server.sell_multiplier";
+    public static final String CONFIG_RECIPE_MULTIPLIER =
+            PREFIX + "config.server.recipe_multiplier";
+    public static final String CONFIG_STARTING_BALANCE = PREFIX + "config.server.starting_balance";
+    public static final String CONFIG_DEATH_PENALTY = PREFIX + "config.server.death_penalty";
+    public static final String CONFIG_ADVANCEMENT_BASE = PREFIX + "config.server.advancement_base";
+    public static final String CONFIG_ADVANCEMENT_EXPONENT =
+            PREFIX + "config.server.advancement_exponent";
+    public static final String CONFIG_TRANSACTION_LOG = PREFIX + "config.server.transaction_log";
+    public static final String CONFIG_LEADERBOARD_PUBLIC =
+            PREFIX + "config.server.leaderboard_public";
+
+    public static final String CONFIG_ON = PREFIX + "config.on";
+    public static final String CONFIG_OFF = PREFIX + "config.off";
+
     // ---- tooltips ----
     public static final String TOOLTIP_PRICE = PREFIX + "tooltip.price";
 

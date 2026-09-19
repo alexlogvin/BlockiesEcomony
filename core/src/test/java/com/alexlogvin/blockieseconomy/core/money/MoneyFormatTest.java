@@ -36,6 +36,25 @@ class MoneyFormatTest {
     }
 
     @Test
+    @DisplayName("the decimal place appears only while the scaled value is a single digit")
+    void decimalOnlyBelowTen() {
+        // Below 10 the decimal carries real information: 1.2K and 9.9K are eight times
+        // apart, and dropping it would round both to a single misleading digit.
+        assertEquals("9.9K", MoneyFormat.shortForm(9_999L));
+        // At two digits it is noise — 12.3K and 12K differ by 2% in a number read at a
+        // glance — and the shorter form fits the HUD and a price cell.
+        assertEquals("10K", MoneyFormat.shortForm(10_000L));
+        assertEquals("12K", MoneyFormat.shortForm(12_345L));
+        assertEquals("999K", MoneyFormat.shortForm(999_999L));
+        // The rule restarts at every tier, not once.
+        assertEquals("9.9M", MoneyFormat.shortForm(9_999_999L));
+        assertEquals("10M", MoneyFormat.shortForm(10_000_000L));
+        assertEquals("999M", MoneyFormat.shortForm(999_999_999L));
+        assertEquals("1.0B", MoneyFormat.shortForm(1_000_000_000L));
+        assertEquals("-12K", MoneyFormat.shortForm(-12_345L));
+    }
+
+    @Test
     @DisplayName("tiers cover thousands through trillions")
     void tiers() {
         assertEquals(Tier.ONE, MoneyFormat.tierOf(999L));

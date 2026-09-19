@@ -11,7 +11,7 @@ authors = "${mod_author}"
 description = '''
 ${mod_description}
 '''
-logoFile = "icon.png"
+logoFile = "assets/${mod_id}/icon.png"
 displayURL = "${mod_homepage}"
 
 [[dependencies.${mod_id}]]

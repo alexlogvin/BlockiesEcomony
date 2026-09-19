@@ -122,6 +122,49 @@ public final class ServerConfig {
         return confirmThreshold;
     }
 
+    // ---- mutators ----------------------------------------------------------------
+    //
+    // Only the settings the in-game config screen offers. Everything else is edited in
+    // server.toml, where the surrounding comments explain it.
+    //
+    // None of these validate the arbitrage invariant, and that is deliberate.
+    // MultiplierTable already owns that rule and clamps on load; a second copy here
+    // would be a second definition of exactly the kind that made the shop quote a sell
+    // price it would not pay. The screen saves, reloads, and reads the clamped values
+    // back, so an out-of-range entry corrects itself in front of the player.
+
+    public void setSellMultiplier(double sellMultiplier) {
+        this.sellMultiplier = sellMultiplier;
+    }
+
+    public void setDefaultRecipeMultiplier(double defaultRecipeMultiplier) {
+        this.defaultRecipeMultiplier = defaultRecipeMultiplier;
+    }
+
+    public void setStartingBalance(long startingBalance) {
+        this.startingBalance = startingBalance;
+    }
+
+    public void setDeathPenalty(long deathPenalty) {
+        this.deathPenalty = deathPenalty;
+    }
+
+    public void setAdvancementBase(long advancementBase) {
+        this.advancementBase = advancementBase;
+    }
+
+    public void setAdvancementExponent(double advancementExponent) {
+        this.advancementExponent = advancementExponent;
+    }
+
+    public void setTransactionLog(boolean transactionLog) {
+        this.transactionLog = transactionLog;
+    }
+
+    public void setLeaderboardPublic(boolean leaderboardPublic) {
+        this.leaderboardPublic = leaderboardPublic;
+    }
+
     /** Builds the multiplier table, clamping anything that would allow arbitrage. */
     public MultiplierTable multiplierTable() {
         return MultiplierTable.of(recipeMultipliers, defaultRecipeMultiplier, sellMultiplier);

@@ -3,9 +3,11 @@ package com.alexlogvin.blockieseconomy.forge;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.client.BalanceHud;
 import com.alexlogvin.blockieseconomy.client.ClientHooks;
+import com.alexlogvin.blockieseconomy.client.ConfigScreen;
 import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -14,6 +16,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 
 /**
  * Forge client wiring (Minecraft 1.20.1).
@@ -61,7 +64,23 @@ public final class ForgeClient {
         MinecraftForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingOut event) -> ClientHooks.onLeaveWorld());
 
+        registerConfigScreen();
+
         ClientHooks.init();
+    }
+
+    /**
+     * Enables the Config button beside this mod in the Mods list.
+     *
+     * <p>Forge asks for the factory through an extension point rather than a registry, so
+     * this is the whole integration: hand it something that builds a Screen and the button
+     * that was greyed out becomes live.
+     */
+    private static void registerConfigScreen() {
+        ModLoadingContext.get().registerExtensionPoint(
+                ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory(
+                        (minecraft, parent) -> new ConfigScreen(parent)));
     }
 
     private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {

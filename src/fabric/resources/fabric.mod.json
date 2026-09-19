@@ -18,7 +18,8 @@
   ],
   "entrypoints": {
     "main": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabric"],
-    "client": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabricClient"]
+    "client": ["com.alexlogvin.blockieseconomy.fabric.BlockiesEconomyFabricClient"],
+    "modmenu": ["com.alexlogvin.blockieseconomy.fabric.ModMenuIntegration"]
   },
   "depends": {
     "fabricloader": ">=0.15.0",

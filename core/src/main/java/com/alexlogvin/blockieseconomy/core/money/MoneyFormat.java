@@ -101,7 +101,14 @@ public final class MoneyFormat {
     }
 
     /**
-     * Compact form with a single decimal place: {@code 532}, {@code 1.2K}, {@code 3.5M}.
+     * Compact form: {@code 532}, {@code 1.2K}, {@code 12K}, {@code 3.5M}, {@code 35M}.
+     *
+     * <p>The decimal place appears only when the scaled value is below 10 — that is, on
+     * the first of each tier's three digits. It earns its width there, where {@code 1.2K}
+     * and {@code 9.9K} are eight times apart and {@code 1K} and {@code 9K} would both
+     * round to nothing useful. Once the scaled value reaches two digits the decimal is
+     * noise: {@code 12.3K} and {@code 12K} differ by 2% in a number the player is reading
+     * at a glance, and the shorter one fits a narrow HUD and a price cell.
      *
      * <p>Truncates rather than rounds, so the displayed figure never overstates what a
      * player can afford. Showing {@code 1.0K} for 999 would be a lie they act on.
@@ -116,14 +123,17 @@ public final class MoneyFormat {
         long magnitude = Math.abs(amount);
         long divisor = tier.divisor();
         long whole = magnitude / divisor;
-        long tenths = (magnitude % divisor) * 10L / divisor;
 
         StringBuilder sb = new StringBuilder(12);
         if (negative) {
             sb.append('-');
         }
-        sb.append(whole).append(labels.decimalSeparator()).append(tenths)
-          .append(labels.suffix(tier));
+        sb.append(whole);
+        if (whole < 10L) {
+            long tenths = (magnitude % divisor) * 10L / divisor;
+            sb.append(labels.decimalSeparator()).append(tenths);
+        }
+        sb.append(labels.suffix(tier));
         return sb.toString();
     }
 
