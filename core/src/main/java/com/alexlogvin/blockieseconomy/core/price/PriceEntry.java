@@ -34,11 +34,13 @@ public final class PriceEntry {
     /**
      * Sell price in whole Blockies, rounded down.
      *
-     * <p>Rounding down here while buy rounds up keeps the spread from ever inverting on
-     * cheap items — a 1-Blockie item must not sell for 1.
+     * <p>Computed from {@link #buyPrice()}, not from {@link #buyMicros()}. The exact micro
+     * value is the solver's business; the player's is the whole number they are charged,
+     * and the sell spread has to be a percentage of that or the shop quotes a price it does
+     * not pay. See {@link Money#sellPrice}, which is the single definition both sides use.
      */
     public long sellPrice(double sellMultiplier) {
-        return Money.fromMicrosFloor(Money.scale(buyMicros, sellMultiplier));
+        return Money.sellPrice(buyPrice(), sellMultiplier);
     }
 
     public PriceSource source() {

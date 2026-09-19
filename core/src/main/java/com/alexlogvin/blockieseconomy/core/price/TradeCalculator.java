@@ -50,7 +50,10 @@ public final class TradeCalculator {
             return sellTotal(entry, count, sellMultiplier);
         }
         int clamped = Math.max(0, Math.min(remaining, max));
-        long full = Money.scale(entry.buyMicros(), sellMultiplier);
+        // Pro-rated from the whole sell price, not from the solver's micro value. Same
+        // reason as everywhere else: the number the player was shown is the number the
+        // payout has to start from, or a fresh tool pays less than the shop advertised.
+        long full = Money.toMicros(entry.sellPrice(sellMultiplier));
         long prorated = full / max * clamped;
         return Money.multiply(Money.fromMicrosFloor(prorated), count);
     }

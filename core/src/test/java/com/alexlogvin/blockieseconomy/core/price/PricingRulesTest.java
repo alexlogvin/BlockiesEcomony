@@ -22,14 +22,21 @@ class PricingRulesTest {
     // ---- rounding --------------------------------------------------------------
 
     @Test
-    @DisplayName("buying rounds up and selling rounds down, always")
+    @DisplayName("buying rounds up, and selling takes its spread off that same number")
     void buyRoundsUpSellRoundsDown() {
         // 10.5 Blockies exactly.
         long micros = Money.toMicros(10L) + Money.MICRO_SCALE / 2L;
         PriceEntry entry = new PriceEntry("minecraft:test", micros, PriceSource.DERIVED, null);
 
         assertEquals(11L, entry.buyPrice());              // 10.5 -> 11
-        assertEquals(7L, entry.sellPrice(0.75d));         // 7.875 -> 7
+
+        // 11 * 0.75 = 8.25 -> 8, not floor(10.5 * 0.75) = 7.
+        //
+        // This assertion used to say 7, and that was the bug: the spread came off the
+        // solver's hidden 10.5 while the shop screen quoted it off the 11 the player pays.
+        // The player saw 8 and was paid 7. The spread is a percentage of the price actually
+        // charged, so it has to be taken off the whole buy price.
+        assertEquals(8L, entry.sellPrice(0.75d));
     }
 
     @Test

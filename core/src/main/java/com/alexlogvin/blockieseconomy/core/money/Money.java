@@ -54,6 +54,43 @@ public final class Money {
         return micros <= 0L ? 0L : micros / MICRO_SCALE;
     }
 
+    /**
+     * The sell price of an item, from the buy price the player can actually see.
+     *
+     * <p><b>The one definition.</b> Both the server, when it pays a player, and the client,
+     * when it shows a price, must call this and nothing else. They used to compute it
+     * separately — the server from the solver's exact micro value, the client from the
+     * rounded buy price — and for any item whose true value was fractional the two
+     * disagreed. A stained glass pane priced at 3.4 was bought for 4, displayed as selling
+     * for 3, and paid out 2. That is not a rounding quirk; it is the shop quoting a price
+     * it does not honour.
+     *
+     * <p>Deriving from the whole buy price rather than the micro value is the deliberate
+     * half of the fix. The buy price is the number the player is charged, so it is the only
+     * honest thing for the spread to be a percentage <em>of</em>. Taking the spread off a
+     * hidden fraction instead means a 4-Blockie item can pay 2 — a 50% spread wearing a 25%
+     * label.
+     *
+     * <p>Rounds down, so a 1-Blockie item never sells for 1 and the spread cannot invert.
+     */
+    public static long sellPrice(long buyPrice, double sellMultiplier) {
+        if (buyPrice <= 0L || sellMultiplier <= 0.0d) {
+            return 0L;
+        }
+        if (sellMultiplier >= 1.0d) {
+            // Not a configuration the mod allows, but clamping beats paying more than the
+            // item costs if one ever slips through.
+            return buyPrice;
+        }
+        // Via micro-units rather than double multiplication: a price near MAX_BALANCE has
+        // more significant digits than a double can hold, and silently losing the low ones
+        // on the largest transactions in the game is not acceptable.
+        if (buyPrice <= Long.MAX_VALUE / MICRO_SCALE) {
+            return fromMicrosFloor(scale(toMicros(buyPrice), sellMultiplier));
+        }
+        return (long) Math.floor(buyPrice * sellMultiplier);
+    }
+
     public static long add(long a, long b) {
         long r = a + b;
         // Overflow iff the operands share a sign that the result does not.

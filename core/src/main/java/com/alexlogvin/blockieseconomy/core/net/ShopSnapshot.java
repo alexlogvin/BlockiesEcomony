@@ -1,5 +1,6 @@
 package com.alexlogvin.blockieseconomy.core.net;
 
+import com.alexlogvin.blockieseconomy.core.money.Money;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -58,14 +59,18 @@ public final class ShopSnapshot {
     /**
      * Sell price for one unit, rounded down.
      *
-     * <p>The same rounding the server applies, so the figure shown before a trade matches
-     * the one the player is paid. The server still recomputes it — this is display only.
+     * <p>Delegates to {@link Money#sellPrice} — the same call the server makes when it
+     * actually pays — so the figure shown before a trade is the figure the player gets.
+     * This class once had its own copy of the arithmetic, and the two drifted: the server
+     * took the spread off the solver's hidden micro value while this took it off the whole
+     * buy price, and 92 of 946 vanilla items were quoted a price the server would not
+     * honour. Display code must never re-derive a number the server will re-derive too.
      */
     public long sellPrice(String itemId) {
         long buy = buyPrice(itemId);
         if (buy < 0L) {
             return -1L;
         }
-        return (long) Math.floor(buy * sellMultiplier);
+        return Money.sellPrice(buy, sellMultiplier);
     }
 }
