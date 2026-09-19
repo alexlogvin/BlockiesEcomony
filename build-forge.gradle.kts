@@ -8,6 +8,9 @@
 plugins {
     id("java")
     id("net.neoforged.moddev.legacyforge") version "2.0.147"
+    // Publishing to Modrinth and CurseForge. The version and all of the configuration
+    // live in stonecutter.gradle.kts, which is the one script every node shares.
+    id("me.modmuss50.mod-publish-plugin")
 }
 
 val mcVersion = stonecutter.current.version

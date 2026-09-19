@@ -383,7 +383,16 @@ classes directory rather than the merged jar. None of these is visible to `./gra
 - [x] 14.1 `scripts/build-release.ps1` + `.sh` taking version and optional loader/MC filters, emitting `build/release/<modversion>/`
 - [x] 14.2 Jar naming: `blockies_economy-<mc>-<loader>-<modversion>.jar`, fixed permanently
 - [x] 14.3 GitHub Actions matrix over (loader × mc), `fail-fast: false`
-- [ ] 14.4 `mod-publish-plugin` wired to Modrinth + CurseForge, driven by repo secrets, so a tag push releases
+- [x] 14.4 `mod-publish-plugin` wired to Modrinth + CurseForge, driven by repo secrets, so a tag push releases
+      - Configured once in `stonecutter.gradle.kts` for every node. A script applied with
+        `apply(from = ...)` cannot see the plugin's types, and the four loader scripts must
+        not share a buildscript classpath, so the root script is the only place this fits.
+      - Five jars publish as five versions per site, one per (Minecraft version x loader).
+      - Ids live in `gradle.properties`. A blank id skips that platform entirely.
+        **CurseForge needs the numeric project id, not the slug** - uploads go to
+        `/api/projects/<id>/upload-file`.
+      - The release job uploads the artifacts the build jobs already tested, rather than
+        rebuilding: `publishMods` reads the jar by path and takes no task dependency.
 - [ ] 14.5 Final `./gradlew build` across the whole matrix
 
 ### M15 — Docs
@@ -484,6 +493,8 @@ Testing found three defects that reading had not: Sell stayed enabled with an em
 inventory, the widget list doubled on every window resize, and the status line compared
 against a fresh `Component.empty()` so it was never equal.
 
-**Still open.** M12 (recipe-viewer integration), M14.4 (mod-publish-plugin — needs Modrinth
-and CurseForge project ids that do not exist yet), M15.1 (README is written but should be
+**Still open.** M12 (recipe-viewer integration), M15.1 (README is written but should be
 re-read once M12 lands), M16 (expansion).
+
+M14.4 is done and dry-run verified against all five nodes. CurseForge stays switched off
+until `publish.curseforge_id` is filled in with the numeric id from the project page.

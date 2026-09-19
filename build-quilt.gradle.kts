@@ -8,6 +8,9 @@
 plugins {
     id("java")
     id("net.fabricmc.fabric-loom-remap") version "1.18.2"
+    // Publishing to Modrinth and CurseForge. The version and all of the configuration
+    // live in stonecutter.gradle.kts, which is the one script every node shares.
+    id("me.modmuss50.mod-publish-plugin")
 }
 
 val mcVersion = stonecutter.current.version

@@ -1,9 +1,11 @@
 name: Release
 
-# Pushing a tag like v0.1.0 builds every jar and publishes them.
+# Pushing a tag like v0.1.0 builds every jar and publishes them to GitHub, Modrinth and
+# CurseForge.
 #
-# Publishing is skipped silently when the relevant secret is missing, so a fork can cut its
-# own tagged builds and get the jars as artifacts without holding any tokens.
+# A platform is skipped silently when its token is missing or its project id is not
+# configured, so a fork can cut its own tagged builds and get the jars as artifacts without
+# holding any credentials. See gradle.properties for the ids.
 on:
   push:
     tags: ['v*']
@@ -49,36 +51,85 @@ jobs:
 
   publish:
     name: Publish
+    # Every node must build before anything is published, so a broken loader cannot leave
+    # four of five versions live on the sites.
     needs: build
     runs-on: ubuntu-latest
     # A dry run still produces every jar; it just stops before anything leaves the repo.
     if: github.event_name == 'push' || !inputs.dry_run
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The changelog is built from the commits since the previous tag, which needs
+          # the tags and the history behind them.
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           pattern: jar-*
-          merge-multiple: true
-          path: release
-      - name: Drop sources jars
-        run: rm -f release/*-sources.jar
+          path: artifacts
+
+      - name: Lay the jars out where Gradle and the release expect them
+        run: |
+          set -euo pipefail
+          # publishMods reads versions/<node>/build/libs/, and it deliberately does not
+          # depend on the jar tasks — so putting the built jars back here is what makes it
+          # upload the exact bytes the build jobs tested, without rebuilding them.
+          for dir in artifacts/jar-*; do
+            node="${dir#artifacts/jar-}"
+            mkdir -p "versions/$node/build/libs"
+            cp "$dir"/*.jar "versions/$node/build/libs/"
+          done
+
+          mkdir -p release
+          cp artifacts/jar-*/*.jar release/
+          # Sources jars are useful from the repo, not as release downloads where they sit
+          # next to the real jar and get installed by mistake.
+          rm -f release/*-sources.jar
+          ls -l release
+
+      - name: Changelog from the commits since the previous tag
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          previous="$(git describe --tags --abbrev=0 "$tag^" 2>/dev/null || true)"
+          if [ -n "$previous" ]; then
+            range="$previous..$tag"
+          else
+            # First release: everything is new, but the whole history would be noise.
+            range="$(git rev-list --max-parents=0 HEAD | tail -1)..$tag"
+          fi
+          {
+            echo "RELEASE_CHANGELOG<<CHANGELOG_EOF"
+            git log --no-merges --pretty='- %s' "$range"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_ENV"
+
       - name: GitHub release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.jar
           generate_release_notes: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+            25
+      - uses: gradle/actions/setup-gradle@v4
+
       - name: Modrinth and CurseForge
-        # Not wired yet. mod-publish-plugin needs a Modrinth project id and a CurseForge
-        # project id, neither of which exists until the pages are created — so this step
-        # states that plainly instead of calling a task that is not configured.
-        # See PLAN.md M14.4.
-        env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-        run: |
-          if [ -z "$MODRINTH_TOKEN" ] && [ -z "$CURSEFORGE_TOKEN" ]; then
-            echo "No publishing tokens configured; the GitHub release above is the output."
-          else
-            echo "::warning::Tokens are present but mod-publish-plugin is not configured yet."
-            echo "Create the Modrinth and CurseForge projects, then wire the plugin (PLAN.md M14.4)."
-          fi
+        # Skipped entirely with no tokens, so the GitHub release above is still the output
+        # for a fork. Each platform is skipped individually inside Gradle when its project
+        # id is blank.
+        if: env.MODRINTH_TOKEN != '' || env.CURSEFORGE_TOKEN != ''
+        run: ./gradlew publishMods
+
+      - name: No tokens configured
+        if: env.MODRINTH_TOKEN == '' && env.CURSEFORGE_TOKEN == ''
+        run: echo "No publishing tokens set; the GitHub release above is the output."
