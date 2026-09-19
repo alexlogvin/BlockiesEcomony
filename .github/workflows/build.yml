@@ -11,6 +11,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  nodes:
+    # The node list comes from the repo rather than from a copy of it kept here. There is
+    # one directory per (Minecraft version x loader) and there are a lot of them; a
+    # hardcoded list in two workflows is a list that silently stops matching the tree.
+    name: Collect nodes
+    runs-on: ubuntu-latest
+    outputs:
+      nodes: ${{ steps.collect.outputs.nodes }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: collect
+        run: |
+          # Built with sed and paste rather than jq so the quoting is identical in a local
+          # shell and can be checked without pushing.
+          nodes="[$(ls versions | sed 's/.*/"&"/' | paste -sd, -)]"
+          echo "nodes=$nodes" >> "$GITHUB_OUTPUT"
+          echo "Building: $nodes"
+
   core:
     # The pure-Java library carries the solver, the ledger and the wire format, and needs no
     # Minecraft at all. Running it on its own gives a real answer in under a minute, rather
@@ -36,18 +54,14 @@ jobs:
 
   jars:
     name: ${{ matrix.node }}
-    needs: core
+    needs: [nodes, core]
     runs-on: ubuntu-latest
     strategy:
       # Every node is independent, so one loader breaking should still tell us about the
       # others rather than cancelling them.
       fail-fast: false
       matrix:
-        node:
-          - 1.20.1-fabric
-          - 1.20.1-forge
-          - 1.21.1-fabric
-          - 1.21.1-neoforge
+        node: ${{ fromJSON(needs.nodes.outputs.nodes) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

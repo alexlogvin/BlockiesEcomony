@@ -84,7 +84,13 @@ dependencies {
     // Parchment layers parameter names on top, which Mojmap lacks.
     mappings(loom.layered {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${property("deps.parchment_mc")}:${property("deps.parchment")}@zip")
+    // Parchment adds Mojmap the one thing it lacks, parameter names, and nothing else -
+    // so a node without it compiles identically and only reads worse in an IDE. It is
+    // optional because ParchmentMC has no stable release for several of the versions this
+    // repo targets, and pinning a nightly snapshot would make those builds non-reproducible.
+        if (project.findProperty("deps.parchment") != null) {
+            parchment("org.parchmentmc.data:parchment-${property("deps.parchment_mc")}:${property("deps.parchment")}@zip")
+        }
     })
 
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")

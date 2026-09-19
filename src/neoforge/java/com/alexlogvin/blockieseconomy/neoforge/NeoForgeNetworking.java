@@ -37,7 +37,12 @@ public final class NeoForgeNetworking implements Networking {
 
         public static final CustomPacketPayload.Type<ToServer> TYPE =
                 new CustomPacketPayload.Type<>(
-                        ResourceLocation.fromNamespaceAndPath(BlockiesEconomy.MOD_ID, "c2s"));
+                        // tryParse rather than fromNamespaceAndPath, which does not
+                        // exist before 1.21. This file is shared by every NeoForge node,
+                        // so one call that only resolves on the newest of them would fork
+                        // the class across the whole loader for no behavioural difference.
+                        // The id is a literal that cannot fail to parse.
+                        ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":c2s"));
 
         public static final StreamCodec<FriendlyByteBuf, ToServer> CODEC = StreamCodec.of(
                 (buf, value) -> write(buf, value.channel(), value.data()),
@@ -53,7 +58,7 @@ public final class NeoForgeNetworking implements Networking {
 
         public static final CustomPacketPayload.Type<ToClient> TYPE =
                 new CustomPacketPayload.Type<>(
-                        ResourceLocation.fromNamespaceAndPath(BlockiesEconomy.MOD_ID, "s2c"));
+                        ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":s2c"));
 
         public static final StreamCodec<FriendlyByteBuf, ToClient> CODEC = StreamCodec.of(
                 (buf, value) -> write(buf, value.channel(), value.data()),

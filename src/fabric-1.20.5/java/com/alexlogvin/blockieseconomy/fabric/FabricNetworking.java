@@ -30,7 +30,11 @@ public final class FabricNetworking implements Networking {
 
         public static final CustomPacketPayload.Type<Envelope> TYPE =
                 new CustomPacketPayload.Type<>(
-                        ResourceLocation.fromNamespaceAndPath(BlockiesEconomy.MOD_ID, "main"));
+                        // tryParse rather than fromNamespaceAndPath, which does not exist
+                        // before 1.21 and would fork this class across the era for no
+                        // behavioural difference. The id is a literal that cannot fail to
+                        // parse. CoinIcon does the same, for the same reason.
+                        ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":main"));
 
         public static final StreamCodec<FriendlyByteBuf, Envelope> CODEC = StreamCodec.of(
                 (buf, value) -> {

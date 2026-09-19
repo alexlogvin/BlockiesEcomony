@@ -79,7 +79,7 @@ public final class NeoForgeClient {
      */
     private static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(
-                ResourceLocation.fromNamespaceAndPath(BlockiesEconomy.MOD_ID, "balance"),
+                ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":balance"),
                 (graphics, deltaTracker) -> BalanceHud.render(graphics));
     }
 

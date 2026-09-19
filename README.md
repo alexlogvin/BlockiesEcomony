@@ -83,7 +83,11 @@ You can price your own items **without depending on this mod**: ship a datapack 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
 | 1.21, 1.21.1 | yes | yes | deferred | use the Fabric jar |
+| 1.20.5, 1.20.6 | yes | 1.20.6 only | n/a | use the Fabric jar |
 | 1.20.1 | yes | n/a | yes | use the Fabric jar |
+
+NeoForge covers 1.20.6 but not 1.20.5, which never got a stable NeoForge release — only
+`20.5.21-beta`.
 
 Forge on 1.21.x is deferred rather than abandoned: the build plugin cannot produce it yet. See
 [PLAN.md](PLAN.md) M16.3.

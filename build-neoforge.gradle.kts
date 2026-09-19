@@ -35,9 +35,15 @@ tasks.withType<JavaCompile>().configureEach {
 
 neoForge {
     version = property("deps.neoforge") as String
-    parchment {
-        minecraftVersion = property("deps.parchment_mc") as String
-        mappingsVersion = property("deps.parchment") as String
+    // Parchment adds Mojmap the one thing it lacks, parameter names, and nothing else -
+    // so a node without it compiles identically and only reads worse in an IDE. It is
+    // optional because ParchmentMC has no stable release for several of the versions this
+    // repo targets, and pinning a nightly snapshot would make those builds non-reproducible.
+    if (project.findProperty("deps.parchment") != null) {
+        parchment {
+            minecraftVersion = property("deps.parchment_mc") as String
+            mappingsVersion = property("deps.parchment") as String
+        }
     }
 
     // Without this the mod is invisible in dev runs: ModDevGradle only puts a source
