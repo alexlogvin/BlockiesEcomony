@@ -48,6 +48,14 @@ public final class ShopScreen extends Screen {
     private static final int GRID_TOP_OFFSET = 42;
     private static final int SCROLLBAR_WIDTH = 6;
 
+    /**
+     * How far the per-cell buy/sell prices are shrunk.
+     *
+     * <p>A grid cell is not wide enough for two full-size numbers, and abbreviating them
+     * further would cost the digit that tells a player whether something is 1K or 9K.
+     */
+    private static final float PRICE_SCALE = 0.7f;
+
     private static final int COLOUR_TITLE = 0xFFFFFF;
     private static final int COLOUR_LABEL = 0xA0A0A0;
     private static final int COLOUR_BUY = 0xFF6060;
@@ -599,14 +607,10 @@ public final class ShopScreen extends Screen {
 
         String prices = ClientMoneyText.shortForm(entry.buy) + "/"
                 + ClientMoneyText.shortForm(entry.sell);
-        graphics.pose().pushPose();
-        graphics.pose().scale(0.7f, 0.7f, 1.0f);
-        int textWidth = (int) (font.width(prices) * 0.7f);
-        graphics.drawString(font, prices,
-                (int) ((cellX + (CELL_WIDTH - textWidth) / 2) / 0.7f),
-                (int) ((cellY + 20) / 0.7f),
-                affordable ? COLOUR_TITLE : COLOUR_LABEL, false);
-        graphics.pose().popPose();
+        int textWidth = (int) (font.width(prices) * PRICE_SCALE);
+        GuiGraphicsCompat.drawScaledText(graphics, font, prices,
+                cellX + (CELL_WIDTH - textWidth) / 2, cellY + 20, PRICE_SCALE,
+                affordable ? COLOUR_TITLE : COLOUR_LABEL);
     }
 
     private void renderScrollbar(GuiGraphics graphics, int gridTop, int gridBottom) {
@@ -691,7 +695,7 @@ public final class ShopScreen extends Screen {
         lines.add(Component.translatable(Lang.SHOP_UNIT_SELL,
                 ClientMoneyText.fullForm(entry.sell)));
         lines.add(Component.translatable(Lang.SHOP_PIN_HINT));
-        graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+        GuiGraphicsCompat.componentTooltip(graphics, font, lines, mouseX, mouseY);
     }
 
     /** Draws a filled panel with a hairline border, matching the vanilla tooltip look. */

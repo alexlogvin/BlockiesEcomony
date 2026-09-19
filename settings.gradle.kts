@@ -59,6 +59,8 @@ stonecutter {
             "1.21.4-neoforge" to "1.21.4",
             "1.21.5-fabric"   to "1.21.5",
             "1.21.5-neoforge" to "1.21.5",
+            "1.21.8-fabric"   to "1.21.8",
+            "1.21.8-neoforge" to "1.21.8",
         )
     }
 }

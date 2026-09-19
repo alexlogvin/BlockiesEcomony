@@ -82,6 +82,7 @@ You can price your own items **without depending on this mod**: ship a datapack 
 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
+| 1.21.6 — 1.21.8 | yes | yes | deferred | use the Fabric jar |
 | 1.21.5 | yes | yes | deferred | use the Fabric jar |
 | 1.21.2 – 1.21.4 | yes | yes | deferred | use the Fabric jar |
 | 1.21, 1.21.1 | yes | yes | deferred | use the Fabric jar |
@@ -133,10 +134,11 @@ does not mean editing source.
 | `1.20.5` | 1.20.5 — 1.21.1 | item NBT becomes components; networking becomes payloads; saved data is handed registries |
 | `1.21.2` | 1.21.2 — 1.21.4 | the recipe rewrite; `GuiGraphics.blit` takes a render type |
 | `1.21.5` | 1.21.5 | saved data moves to codecs; `CompoundTag` getters return `Optional` |
+| `1.21.6` | 1.21.6 — 1.21.8 | drawing moves onto render pipelines; the pose stack becomes a JOML `Matrix3x2fStack`; tooltips are queued for the next frame |
 
-Only three kinds of class fork: the recipe and advancement adapter, balance persistence, and two
-one-method helpers for drawing and for registering a reload listener. Everything else — about
-6,000 lines — is shared by every era.
+Four kinds of class fork: the recipe and advancement adapter, balance persistence, the screen
+background, and one collecting every `GuiGraphics` call whose shape changed. NeoForge adds two
+more of its own. Everything else — about 6,000 lines — is shared by every era.
 
 The `1.20.5` era is the one covering two spans rather than one. Its source compiles correctly on
 1.20.6 and on 1.21 alike, because the only thing changing between them is Fabric API's HUD
@@ -144,10 +146,9 @@ callback, and that is registered with a lambda whose second parameter is unused 
 type inferred. The two jars differ by exactly that one class, which is why they are still two
 jars.
 
-Versions past 1.21.5 are not covered yet. Measured against the current source, 1.21.6 — 1.21.8
-moves `GuiGraphics` onto `RenderPipeline` and the pose onto `Matrix3x2f`, 1.21.9 — 1.21.10
-changes the `Screen` input signatures and makes keybind categories a type, and 1.21.11 is the
-widest break in the line.
+Versions past 1.21.8 are not covered yet. Measured against the current source, 1.21.9 —
+1.21.10 changes the `Screen` input signatures and makes keybind categories a type, and 1.21.11
+is the widest break in the line.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).

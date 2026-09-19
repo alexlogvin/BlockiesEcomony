@@ -144,7 +144,7 @@ public final class NeoForgeNetworking implements Networking {
 
     @Override
     public void sendToServer(String channel, byte[] payload) {
-        PacketDistributor.sendToServer(new ToServer(channel, payload));
+        ClientPackets.sendToServer(new ToServer(channel, payload));
     }
 
     @Override

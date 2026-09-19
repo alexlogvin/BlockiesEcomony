@@ -40,11 +40,11 @@ public final class CoinIcon {
     /**
      * Draws the coin at {@code size} pixels square.
      *
-     * <p>Through {@link IconBlit} because the blit that scales a 32-pixel texture into a
-     * smaller box was resignatured in 1.21.2. That is the only line of this class that
-     * differs by version, so it is the only line that forks.
+     * <p>Through {@link GuiGraphicsCompat} because the blit that scales a 32-pixel texture
+     * into a smaller box has been resignatured twice since 1.20.1. That is the only line of
+     * this class that differs by version, so it is the only line that forks.
      */
     public static void draw(GuiGraphics graphics, int x, int y, int size) {
-        IconBlit.draw(graphics, TEXTURE, x, y, size, TEXTURE_SIZE);
+        GuiGraphicsCompat.drawIcon(graphics, TEXTURE, x, y, size, TEXTURE_SIZE);
     }
 }
