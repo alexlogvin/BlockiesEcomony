@@ -86,14 +86,16 @@ You can price your own items **without depending on this mod**: ship a datapack 
 | 1.21.9, 1.21.10 | yes | yes | deferred | use the Fabric jar |
 | 1.21.6 — 1.21.8 | yes | yes | deferred | use the Fabric jar |
 | 1.21.5 | yes | yes | deferred | use the Fabric jar |
-| 1.21.2 – 1.21.4 | yes | yes | deferred | use the Fabric jar |
+| 1.21.2 — 1.21.4 | yes | yes | deferred | use the Fabric jar |
 | 1.21, 1.21.1 | yes | yes | deferred | use the Fabric jar |
 | 1.20.5, 1.20.6 | yes | 1.20.6 only | n/a | use the Fabric jar |
-| 1.20.2 – 1.20.4 | yes | not yet | n/a | use the Fabric jar |
-| 1.20.1 | yes | n/a | yes | use the Fabric jar |
+| 1.20.2 — 1.20.4 | yes | not yet | n/a | use the Fabric jar |
+| 1.20, 1.20.1 | yes | n/a | 1.20.1 only | use the Fabric jar |
 
-NeoForge covers 1.20.6 but not 1.20.5, which never got a stable NeoForge release — only
-`20.5.21-beta`.
+Forge is on 1.20.1 only: Forge for 1.20 is a different major (46 against 47), and 1.21.x is
+deferred — see below. NeoForge covers 1.20.6 but not 1.20.5, which never got a stable NeoForge
+release, only `20.5.21-beta`; and not 1.20.2 — 1.20.4, where its loader APIs predate what the
+shared glue uses. See [PLAN.md](PLAN.md) M16.4.
 
 Forge on 1.21.x is deferred rather than abandoned: the build plugin cannot produce it yet. See
 [PLAN.md](PLAN.md) M16.3.
@@ -131,7 +133,7 @@ does not mean editing source.
 
 | Era | Minecraft | What forces the break at its lower edge |
 |---|---|---|
-| `1.20.1` | 1.20.1 | the last version where a recipe carries its own id and an advancement its own parent |
+| `1.20.1` | 1.20, 1.20.1 | the last versions where a recipe carries its own id and an advancement its own parent |
 | `1.20.2` | 1.20.2 — 1.20.4 | identity moves into `RecipeHolder` and `AdvancementHolder`; `renderBackground` gains arguments |
 | `1.20.5` | 1.20.5 — 1.21.1 | item NBT becomes components; networking becomes payloads; saved data is handed registries |
 | `1.21.2` | 1.21.2 — 1.21.4 | the recipe rewrite; `GuiGraphics.blit` takes a render type |
@@ -156,7 +158,14 @@ callback, and that is registered with a lambda whose second parameter is unused 
 type inferred. The two jars differ by exactly that one class, which is why they are still two
 jars.
 
-The 26.x line is not covered yet.
+The 26.x line is not covered yet, and the reason is not the toolchain. 26.x ships
+unobfuscated, which Fabric builds with a different Loom variant, and that part is understood.
+What stops it is that 26.x renames `GuiGraphics` to `GuiGraphicsExtractor`: the methods are
+unchanged, but the type appears in 23 signatures across the shared client classes, and a
+parameter type cannot be pushed behind a helper the way a call can. Either those four classes
+fork into the era, or every version gives up some type safety so one of them need not. It is
+a design decision, and 26.3 is days old with NeoForge for it still in beta, so it waits. The
+full findings are in [PLAN.md](PLAN.md) M16.2.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).

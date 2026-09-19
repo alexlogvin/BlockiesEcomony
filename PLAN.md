@@ -409,8 +409,40 @@ classes directory rather than the merged jar. None of these is visible to `./gra
 - [x] 15.3 `price-packs/` folder with a template and 1–2 worked examples
 
 ### M16 — Expansion (post-v1)
-- [ ] 16.1 Add node `1.21.11`
-- [ ] 16.2 Add node `26.3` — Java 25, unobfuscated, **no `remapJar`**; NeoForge 26.3 is beta-only and Forge has no 26.3 build at all
+- [x] 16.1 Every Minecraft version from 1.20 to 1.21.11 now has a node. Eight source eras,
+  seventeen jars; see the era table in README.
+- [ ] 16.2 **The 26.x line — scouted, not started.** What was established by building it:
+  - **Toolchain solved.** Fabric needs `net.fabricmc.fabric-loom-no-remap` (latest
+    `1.14.0-alpha.31`, actively maintained on its own version line) instead of
+    `fabric-loom-remap`. It needs its own build script: a different plugin, and Stonecutter
+    gives each node its own buildscript classpath precisely so two toolchains never share one.
+    Inside it, drop the `mappings` block entirely and use `implementation`/`compileOnly`
+    rather than `modImplementation`/`modCompileOnly` — with no remapping there is no
+    separate mod classpath. `settings.gradle.kts` then picks the script by version as well as
+    by loader. Java 25 (the build scripts already select it).
+  - **Why unobfuscated matters practically.** 26.3's version manifest has no `client_mappings`
+    download at all, and Fabric's intermediary stops at 1.21.11. There is nothing to map to,
+    so the remapping variant fails outright rather than degrading.
+  - **The one real blocker.** 26.x renames `GuiGraphics` to `GuiGraphicsExtractor` (and
+    `com.mojang.blaze3d` to `com.mojang.renderpearl`). The methods are the same shape, so this
+    is mechanical — but the type is named in 23 signatures across four *shared* client
+    classes, and a parameter type cannot be hidden behind a helper the way a call can. Two
+    honest options, and it is a design decision rather than a mechanical one:
+      1. Fork `ShopScreen`, `ConfigScreen`, `BalanceHud` and `CoinIcon` into the era
+         (~1,500 duplicated lines, against ~50 for every era so far).
+      2. Type the graphics parameter as `Object` in shared code and cast once inside
+         `GuiGraphicsCompat` (no duplication, but every version pays in type safety for one).
+  - **Smaller work behind it:** Fabric API moved its keybinding and HUD modules,
+    `InputConstants.isKeyDown` changed shape, and `ItemStack.drop` lost an overload. 44
+    compile errors in total, the great majority of them the rename.
+  - **Ecosystem is beta.** 26.3 released 2026-09-15. NeoForge for it is `26.3.0.6-beta`, Mod
+    Menu is `21.0.0-beta.1`, and Forge has no 26.x build at all. Porting now is porting to a
+    moving target; this is worth revisiting once NeoForge 26.x cuts a stable release.
+- [ ] 16.4 **NeoForge on 1.20.2 — 1.20.4.** The Fabric jar covers this span; NeoForge does not,
+  because 20.2 — 20.4 predate four APIs the shared loader glue uses: the payload registrar,
+  GUI layers, the config-screen extension point and the current client tick event. That is a
+  real port of `NeoForgeNetworking` and `NeoForgeClient`, not a version range. Left until last
+  deliberately: NeoForge's players are overwhelmingly on the 1.21 line, which is covered.
 - [ ] 16.3 **Forge on 1.21.x — deferred by decision, not blocked forever.** ModDevGradle 2.0.147 cannot
   build post-1.20.1 Forge: its NeoFormRuntime resolves only from NeoForged Maven and the local
   `.m2`, never learns `maven.minecraftforge.net`, and does not declare `forge:universal-srg` or
@@ -422,7 +454,7 @@ classes directory rather than the merged jar. None of these is visible to `./gra
   NeoForge covers the 1.21.1 Forge-side audience meanwhile, and the ecosystem has largely moved
   there. The `build-forge.gradle.kts` script already handles 1.21+ Java levels, so only the
   toolchain gap stands in the way.
-- [ ] 16.4 Legacy era tree 1.12.2–1.19.4: separate Gradle build, Java 8/17, ForgeGradle + Loom, consuming the same `core`
+- [ ] 16.5 Legacy era tree 1.12.2–1.19.4: separate Gradle build, Java 8/17, ForgeGradle + Loom, consuming the same `core`
 - **Warning:** 1.21.2 is a violent API break (recipes become a datapack registry, `getResultItem` removed, `Ingredient` becomes `HolderSet`-based, and only placeable recipes sync to clients). Budget real work for the 1.21.1 → 1.21.11 step.
 
 ---

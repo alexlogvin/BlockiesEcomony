@@ -1,8 +1,9 @@
 // Minecraft <version> / Fabric — runs for every versions/<mc>-fabric node.
 //
 // Uses `fabric-loom-remap`: the remapping Loom variant, required for obfuscated
-// Minecraft (everything up to and including 1.21.11). Unobfuscated 26.x nodes will
-// use `fabric-loom-no-remap` instead, which is why this lives in its own script.
+// Minecraft, which is everything up to and including 1.21.11. The 26.x line ships
+// unobfuscated and needs `fabric-loom-no-remap` instead, a different plugin on its own
+// version line — hence its own script when it arrives. See PLAN.md M16.2.
 
 plugins {
     id("java")
@@ -22,7 +23,12 @@ val versionsLabel = extra["versionsLabel"] as String
 val srcEra = extra["srcEra"] as String
 val packSupportedFormats = extra["packSupportedFormats"] as String
 val loader = "fabric"
-val javaLevel = if (stonecutter.current.parsed >= "1.20.5") 21 else 17
+// Minecraft raised its own requirement twice: Java 21 at 1.20.5, Java 25 at 26.1.
+val javaLevel = when {
+    stonecutter.current.parsed >= "26.1" -> 25
+    stonecutter.current.parsed >= "1.20.5" -> 21
+    else -> 17
+}
 
 version = property("mod_version") as String
 base.archivesName = "${property("mod_archive_name")}-$versionsLabel-$loader"
@@ -85,10 +91,11 @@ dependencies {
     // Parchment layers parameter names on top, which Mojmap lacks.
     mappings(loom.layered {
         officialMojangMappings()
-    // Parchment adds Mojmap the one thing it lacks, parameter names, and nothing else -
-    // so a node without it compiles identically and only reads worse in an IDE. It is
-    // optional because ParchmentMC has no stable release for several of the versions this
-    // repo targets, and pinning a nightly snapshot would make those builds non-reproducible.
+        // Parchment adds Mojmap the one thing it lacks, parameter names, and nothing else -
+        // so a node without it compiles identically and only reads worse in an IDE. It is
+        // optional because ParchmentMC has no stable release for several of the versions
+        // this repo targets, and pinning a nightly snapshot would make those builds
+        // non-reproducible.
         if (project.findProperty("deps.parchment") != null) {
             parchment("org.parchmentmc.data:parchment-${property("deps.parchment_mc")}:${property("deps.parchment")}@zip")
         }
@@ -102,7 +109,12 @@ dependencies {
     // interface has to be on the compile classpath. compileOnly keeps it out of the jar
     // and out of the dependency list, so a player without Mod Menu loses the button and
     // nothing else; the Fabric entrypoint class is simply never loaded.
-    modCompileOnly("com.terraformersmc:modmenu:${property("deps.modmenu")}")
+    // Optional because Mod Menu does not have a build for every Minecraft version this
+    // repo targets. Where it is absent the entrypoint class is simply never loaded, which
+    // is already what happens for a player who has not installed it.
+    if (project.findProperty("deps.modmenu") != null) {
+        modCompileOnly("com.terraformersmc:modmenu:${property("deps.modmenu")}")
+    }
 
     implementation(project(":core"))
 }

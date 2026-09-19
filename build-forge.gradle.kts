@@ -23,7 +23,12 @@ val versionsLabel = extra["versionsLabel"] as String
 val srcEra = extra["srcEra"] as String
 val packSupportedFormats = extra["packSupportedFormats"] as String
 val loader = "forge"
-val javaLevel = if (stonecutter.current.parsed >= "1.20.5") 21 else 17
+// Minecraft raised its own requirement twice: Java 21 at 1.20.5, Java 25 at 26.1.
+val javaLevel = when {
+    stonecutter.current.parsed >= "26.1" -> 25
+    stonecutter.current.parsed >= "1.20.5" -> 21
+    else -> 17
+}
 
 version = property("mod_version") as String
 base.archivesName = "${property("mod_archive_name")}-$versionsLabel-$loader"
