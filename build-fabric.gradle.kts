@@ -17,7 +17,7 @@ val loader = "fabric"
 val javaLevel = if (stonecutter.current.parsed >= "1.20.5") 21 else 17
 
 version = property("mod_version") as String
-base.archivesName = "${property("mod_id")}-$mcVersion-$loader"
+base.archivesName = "${property("mod_archive_name")}-$mcVersion-$loader"
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(javaLevel)

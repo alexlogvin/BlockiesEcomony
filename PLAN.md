@@ -384,7 +384,12 @@ classes directory rather than the merged jar. None of these is visible to `./gra
 
 ### M14 — Release tooling
 - [x] 14.1 `scripts/build-release.ps1` + `.sh` taking version and optional loader/MC filters, emitting `build/release/<modversion>/`
-- [x] 14.2 Jar naming: `blockies_economy-<mc>-<loader>-<modversion>.jar`, fixed permanently
+- [x] 14.2 Jar naming: `blockieseconomy-<mc>-<loader>-<modversion>.jar`, fixed permanently
+      - `mod_archive_name`, deliberately separate from `mod_id`. The id stays
+        `blockies_economy` because it is a namespace - asset paths, translation keys, the
+        config directory, the network channel - and renaming it would break every one of
+        those and every config already on disk. The file name is only a file name, and
+        this one matches the Modrinth and CurseForge slugs.
 - [x] 14.3 GitHub Actions matrix over (loader × mc), `fail-fast: false`
 - [x] 14.4 `mod-publish-plugin` wired to Modrinth + CurseForge, driven by repo secrets, so a tag push releases
       - Configured once in `stonecutter.gradle.kts` for every node. A script applied with
