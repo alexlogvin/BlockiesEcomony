@@ -53,17 +53,12 @@ fun Project.configurePublishing() {
     val mcVersion = name.substringBeforeLast('-')
     val loader = name.substringAfterLast('-')
 
-    // The Minecraft versions this jar actually runs on, which is not always the one the
-    // node is named after. A node may cover a span: the 1.21.1 jar also runs on 1.21,
-    // because built against either the remapped classes come out byte-identical.
-    val supportedVersions = (findProperty("meta.mc_versions") as String?)
-        ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
-        ?: listOf(mcVersion)
-
-    val versionsLabel = when (supportedVersions.size) {
-        1 -> supportedVersions.first()
-        else -> supportedVersions.first() + "-" + supportedVersions.last()
-    }
+    // Which Minecraft versions this jar actually runs on, and what it calls itself. Both
+    // come from the node rather than from its name: a node may cover a span. Set by
+    // gradle/node-identity.gradle.kts, which the loader script applied.
+    @Suppress("UNCHECKED_CAST")
+    val supportedVersions = extra["supportedVersions"] as List<String>
+    val versionsLabel = extra["versionsLabel"] as String
 
     val modVersion = version.toString()
     val modName = property("mod_name") as String

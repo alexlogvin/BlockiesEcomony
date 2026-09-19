@@ -102,6 +102,10 @@ close. The 1.21 jar declares `>=1.21 <1.21.2` because building it against 1.21 a
 jar could contain. The NeoForge jar spans the same pair, and drops its loader floor to
 `[21.0,)` to match.
 
+The file name carries the span rather than a single version —
+`blockieseconomy-1.21-1.21.1-fabric-0.1.0.jar` — because a file named after one version is
+what a player reads as the list of versions it supports, and nobody opens a jar to check.
+
 The upper bound is equally deliberate. It is not `~1.21.1`, which Fabric Loader reads as the
 whole 1.21 line: the price engine reads the recipe manager directly, that API was rewritten in
 1.21.2, and a jar claiming the versions after it would install happily and then fail to price

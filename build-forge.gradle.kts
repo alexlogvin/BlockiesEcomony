@@ -13,12 +13,19 @@ plugins {
     id("me.modmuss50.mod-publish-plugin")
 }
 
+apply(from = rootProject.file("gradle/node-identity.gradle.kts"))
+
 val mcVersion = stonecutter.current.version
+
+// What the jar is called and which source era it compiles. A node can cover several
+// Minecraft versions, so neither follows from mcVersion alone; see gradle/node-identity.
+val versionsLabel = extra["versionsLabel"] as String
+val srcEra = extra["srcEra"] as String
 val loader = "forge"
 val javaLevel = if (stonecutter.current.parsed >= "1.20.5") 21 else 17
 
 version = property("mod_version") as String
-base.archivesName = "${property("mod_archive_name")}-$mcVersion-$loader"
+base.archivesName = "${property("mod_archive_name")}-$versionsLabel-$loader"
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(javaLevel)
@@ -75,12 +82,12 @@ sourceSets.main {
     // between versions (a Mixin whose target signature changed, say). Preferred over
     // Stonecutter comment gates when a whole class differs rather than a line.
     // Shared code that forks by Minecraft version, e.g. the recipe adapter.
-    val sharedVersioned = rootProject.file("src/main-${mcVersion}/java")
+    val sharedVersioned = rootProject.file("src/main-${srcEra}/java")
     if (sharedVersioned.isDirectory) {
         java.srcDir(sharedVersioned)
     }
 
-    val versioned = rootProject.file("src/$loader-${mcVersion}/java")
+    val versioned = rootProject.file("src/$loader-${srcEra}/java")
     if (versioned.isDirectory) {
         java.srcDir(versioned)
     }
