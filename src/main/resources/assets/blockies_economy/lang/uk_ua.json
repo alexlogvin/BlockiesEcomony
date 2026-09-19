@@ -1,9 +1,9 @@
 {
   "blockies_economy.currency.symbol": "Б",
-  "blockies_economy.currency.suffix.thousand": " тис.",
-  "blockies_economy.currency.suffix.million": " млн",
-  "blockies_economy.currency.suffix.billion": " млрд",
-  "blockies_economy.currency.suffix.trillion": " трлн",
+  "blockies_economy.currency.suffix.thousand": "K",
+  "blockies_economy.currency.suffix.million": "M",
+  "blockies_economy.currency.suffix.billion": "B",
+  "blockies_economy.currency.suffix.trillion": "T",
   "blockies_economy.currency.separator.group": " ",
   "blockies_economy.currency.separator.decimal": ",",
 
