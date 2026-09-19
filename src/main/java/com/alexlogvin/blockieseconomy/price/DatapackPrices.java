@@ -3,6 +3,7 @@ package com.alexlogvin.blockieseconomy.price;
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.config.PriceDeclarations;
 import com.alexlogvin.blockieseconomy.core.price.PriceSource;
+import com.alexlogvin.blockieseconomy.platform.GameIds;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -12,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.Resource;
 
@@ -66,18 +67,15 @@ public final class DatapackPrices {
      */
     public static List<PriceDeclarations> load(MinecraftServer server) {
         List<PriceDeclarations> result = new ArrayList<PriceDeclarations>();
-        Map<ResourceLocation, Resource> found;
+        SortedMap<String, Resource> found;
         try {
-            found = server.getResourceManager().listResources(DIRECTORY,
-                    location -> location.getPath().endsWith(FILE_SUFFIX));
+            found = GameIds.listResources(server, DIRECTORY, FILE_SUFFIX);
         } catch (RuntimeException e) {
             BlockiesEconomy.LOGGER.warn("Could not scan datapacks for prices: {}", e.toString());
             return result;
         }
 
-        Map<ResourceLocation, Resource> sorted =
-                new TreeMap<ResourceLocation, Resource>(found);
-        for (Map.Entry<ResourceLocation, Resource> entry : sorted.entrySet()) {
+        for (Map.Entry<String, Resource> entry : found.entrySet()) {
             PriceDeclarations declarations = read(entry.getKey(), entry.getValue());
             if (declarations != null && !declarations.isEmpty()) {
                 BlockiesEconomy.LOGGER.info("Loaded {} price declarations from datapack {}",
@@ -88,8 +86,7 @@ public final class DatapackPrices {
         return result;
     }
 
-    private static PriceDeclarations read(ResourceLocation location, Resource resource) {
-        String origin = location.toString();
+    private static PriceDeclarations read(String origin, Resource resource) {
         JsonObject root;
         try (BufferedReader reader = resource.openAsReader()) {
             JsonElement parsed = JsonParser.parseReader(reader);

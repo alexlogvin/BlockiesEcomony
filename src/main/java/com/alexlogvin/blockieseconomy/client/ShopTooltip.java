@@ -3,11 +3,11 @@ package com.alexlogvin.blockieseconomy.client;
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.core.net.ShopSnapshot;
+import com.alexlogvin.blockieseconomy.platform.GameIds;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -44,7 +44,7 @@ public final class ShopTooltip {
             return;
         }
 
-        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String key = GameIds.idOf(stack.getItem());
         if (key == null) {
             // An item another mod created without registering. Rare, but a tooltip runs for
             // every stack the player points at, so it is not the place to throw.

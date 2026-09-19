@@ -79,7 +79,7 @@ public final class ForgeServerEvents implements ServerEvents {
             if (event.getEntity() instanceof ServerPlayer) {
                 // On 1.20.1 the advancement still carries its own id.
                 handler.onEarned((ServerPlayer) event.getEntity(),
-                        event.getAdvancement().getId());
+                        event.getAdvancement().getId().toString());
             }
         });
     }

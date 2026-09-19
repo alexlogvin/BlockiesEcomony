@@ -4,6 +4,7 @@ import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.core.net.ShopSnapshot;
 import com.alexlogvin.blockieseconomy.economy.TradeOutcome;
+import com.alexlogvin.blockieseconomy.platform.GameIds;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +17,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -386,15 +386,7 @@ public final class ShopScreen extends EraScreen {
     }
 
     private static Item resolve(String itemId) {
-        ResourceLocation location = ResourceLocation.tryParse(itemId);
-        if (location == null) {
-            return null;
-        }
-        // getOptional rather than get: `get` hands back the item itself up to 1.21.1 and
-        // an Optional<Holder.Reference<Item>> from 1.21.2, so no one call site can serve
-        // both eras. getOptional keeps the same signature and meaning on every version this
-        // mod targets, and folds in the containsKey check that used to guard this.
-        return BuiltInRegistries.ITEM.getOptional(location).orElse(null);
+        return GameIds.item(itemId);
     }
 
     private Entry selectedEntry() {

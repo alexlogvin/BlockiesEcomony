@@ -36,7 +36,7 @@ public abstract class PlayerAdvancementsMixin {
         AdvancementProgress progress =
                 ((PlayerAdvancements) (Object) this).getOrStartProgress(advancement);
         if (progress.isDone()) {
-            AdvancementBridge.fire(player, advancement.getId());
+            AdvancementBridge.fire(player, advancement.getId().toString());
         }
     }
 }

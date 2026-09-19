@@ -119,9 +119,7 @@ public final class EconomyServer {
         rebuildPrices(reloaded, null);
     }
 
-    private void onAdvancementEarned(ServerPlayer player,
-                                     net.minecraft.resources.ResourceLocation id) {
-        String advancementId = id.toString();
+    private void onAdvancementEarned(ServerPlayer player, String advancementId) {
         Long prize = advancementPrizes.get(advancementId);
         if (prize == null || prize.longValue() <= 0L) {
             return;

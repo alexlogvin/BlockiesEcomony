@@ -82,6 +82,7 @@ You can price your own items **without depending on this mod**: ship a datapack 
 
 | Minecraft | Fabric | NeoForge | Forge | Quilt |
 |---|---|---|---|---|
+| 1.21.11 | yes | yes | deferred | use the Fabric jar |
 | 1.21.9, 1.21.10 | yes | yes | deferred | use the Fabric jar |
 | 1.21.6 — 1.21.8 | yes | yes | deferred | use the Fabric jar |
 | 1.21.5 | yes | yes | deferred | use the Fabric jar |
@@ -137,6 +138,7 @@ does not mean editing source.
 | `1.21.5` | 1.21.5 | saved data moves to codecs; `CompoundTag` getters return `Optional` |
 | `1.21.6` | 1.21.6 — 1.21.8 | drawing moves onto render pipelines; the pose stack becomes a JOML `Matrix3x2fStack`; tooltips are queued for the next frame |
 | `1.21.9` | 1.21.9, 1.21.10 | screen input becomes records; `GameProfile` becomes a record; the profile cache becomes a resolver; keybind categories become registered objects |
+| `1.21.11` | 1.21.11 | `ResourceLocation` is renamed `Identifier`; command permissions become objects rather than a level |
 
 Seven kinds of class fork, none of them large: the recipe and advancement adapter, balance
 persistence, the screen background, the screens' own base class, the keybind, profile lookups,
@@ -154,7 +156,7 @@ callback, and that is registered with a lambda whose second parameter is unused 
 type inferred. The two jars differ by exactly that one class, which is why they are still two
 jars.
 
-Versions past 1.21.10 are not covered yet. 1.21.11 is the widest break in the line.
+The 26.x line is not covered yet.
 
 Newer versions (1.21.11, 26.x) and older ones (1.12.2–1.19.4) are on the roadmap — see
 [PLAN.md](PLAN.md).

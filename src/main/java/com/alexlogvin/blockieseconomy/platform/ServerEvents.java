@@ -3,7 +3,6 @@ package com.alexlogvin.blockieseconomy.platform;
 import com.mojang.brigadier.CommandDispatcher;
 import java.util.function.Consumer;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -11,10 +10,11 @@ import net.minecraft.server.level.ServerPlayer;
  * Server-side hooks, one implementation per loader.
  *
  * <p>Callbacks are expressed in types that are stable across the supported Minecraft
- * versions. Advancements in particular are reported as a {@link ResourceLocation} rather
- * than as the advancement object, because 1.20.1 has {@code Advancement} while 1.21.1 has
- * {@code AdvancementHolder} — resolving that difference is each implementation's job, not
- * the shared code's.
+ * versions. An advancement in particular is reported as its id in string form rather than
+ * as the advancement object, or even as the game's own id type: 1.20.1 has
+ * {@code Advancement} where later versions have {@code AdvancementHolder}, and 1.21.11
+ * renamed {@code ResourceLocation} to {@code Identifier}. Resolving that is each
+ * implementation's job, not the shared code's — which only ever wanted the string.
  *
  * <p>Register handlers during mod construction. Every callback fires on the server thread.
  */
@@ -22,7 +22,7 @@ public interface ServerEvents {
 
     /** Fires when a player earns an advancement, including a criterion-completed one. */
     interface AdvancementListener {
-        void onEarned(ServerPlayer player, ResourceLocation advancementId);
+        void onEarned(ServerPlayer player, String advancementId);
     }
 
     /** Fires while the server builds its command tree. */

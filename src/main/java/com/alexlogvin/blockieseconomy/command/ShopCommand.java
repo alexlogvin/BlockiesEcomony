@@ -5,6 +5,8 @@ import com.alexlogvin.blockieseconomy.EconomyServer;
 import com.alexlogvin.blockieseconomy.Lang;
 import com.alexlogvin.blockieseconomy.core.price.PriceEntry;
 import com.alexlogvin.blockieseconomy.economy.TradeOutcome;
+import com.alexlogvin.blockieseconomy.platform.CommandPermissions;
+import com.alexlogvin.blockieseconomy.platform.GameIds;
 import com.alexlogvin.blockieseconomy.platform.Profiles;
 import com.alexlogvin.blockieseconomy.platform.Services;
 import com.mojang.authlib.GameProfile;
@@ -23,7 +25,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,7 +33,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The {@code /shop} command tree.
  *
- * <p>Item arguments use {@code ResourceLocationArgument} rather than {@code ItemArgument}.
+ * <p>Item arguments are read as a bare id rather than with {@code ItemArgument}.
  * That avoids the 1.20.1/1.21 split where {@code ItemInput} moved from NBT to a
  * {@code DataComponentPatch}, and it lets suggestions be limited to items that actually
  * have a price — suggesting the whole item registry when most of it is not for sale would
@@ -59,7 +60,7 @@ public final class ShopCommand {
         root.then(Commands.literal("balance")
                 .executes(ctx -> ownBalance(ctx, economy))
                 .then(Commands.argument("player", StringArgumentType.word())
-                        .requires(source -> source.hasPermission(adminLevel))
+                        .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                         .suggests(playerSuggestions())
                         .executes(ctx -> otherBalance(ctx, economy))
                         .then(balanceOperation("set", economy, adminLevel))
@@ -67,7 +68,7 @@ public final class ShopCommand {
                         .then(balanceOperation("remove", economy, adminLevel))));
 
         root.then(Commands.literal("buy")
-                .then(Commands.argument("item", ResourceLocationArgument.id())
+                .then(Commands.argument("item", GameIds.idArgument())
                         .suggests(pricedItemSuggestions(economy))
                         .executes(ctx -> buy(ctx, economy, 1))
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
@@ -76,7 +77,7 @@ public final class ShopCommand {
 
         root.then(Commands.literal("sell")
                 .executes(ctx -> sellHeld(ctx, economy, 1))
-                .then(Commands.argument("item", ResourceLocationArgument.id())
+                .then(Commands.argument("item", GameIds.idArgument())
                         .suggests(pricedItemSuggestions(economy))
                         .executes(ctx -> sell(ctx, economy, 1))
                         .then(Commands.argument("count", IntegerArgumentType.integer(1))
@@ -84,37 +85,37 @@ public final class ShopCommand {
                                         IntegerArgumentType.getInteger(ctx, "count"))))));
 
         root.then(Commands.literal("price")
-                .then(Commands.argument("item", ResourceLocationArgument.id())
+                .then(Commands.argument("item", GameIds.idArgument())
                         .suggests(pricedItemSuggestions(economy))
                         .executes(ctx -> showPrice(ctx, economy))
                         .then(Commands.argument("price", LongArgumentType.longArg(0))
-                                .requires(source -> source.hasPermission(adminLevel))
+                                .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                                 .executes(ctx -> setPrice(ctx, economy)))));
 
         root.then(Commands.literal("top")
                 .requires(source -> economy.config().server().leaderboardPublic()
-                        || source.hasPermission(adminLevel))
+                        || CommandPermissions.atLeast(source, adminLevel))
                 .executes(ctx -> leaderboard(ctx, economy)));
 
         root.then(Commands.literal("rebuild")
-                .requires(source -> source.hasPermission(adminLevel))
+                .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                 .executes(ctx -> rebuild(ctx, economy)));
 
         // Kept as an alias because "rebuild" is the clearer name but "recalculate" is
         // what an admin reaching for this is likely to type.
         root.then(Commands.literal("recalculate")
-                .requires(source -> source.hasPermission(adminLevel))
+                .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                 .executes(ctx -> rebuild(ctx, economy)));
 
         root.then(Commands.literal("reload")
-                .requires(source -> source.hasPermission(adminLevel))
+                .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                 .executes(ctx -> reload(ctx, economy)));
 
         root.then(Commands.literal("debug")
-                .requires(source -> source.hasPermission(adminLevel))
+                .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                 .then(Commands.literal("export").executes(ctx -> exportCsv(ctx, economy)))
                 .then(Commands.literal("price")
-                        .then(Commands.argument("item", ResourceLocationArgument.id())
+                        .then(Commands.argument("item", GameIds.idArgument())
                                 .suggests(pricedItemSuggestions(economy))
                                 .executes(ctx -> debugPrice(ctx, economy)))));
 
@@ -157,7 +158,7 @@ public final class ShopCommand {
             source.sendSuccess(() -> Component.translatable(key), false);
         }
 
-        if (source.hasPermission(adminLevel)) {
+        if (CommandPermissions.atLeast(source, adminLevel)) {
             source.sendSuccess(() -> Component.translatable(Lang.HELP_ADMIN_HEADER)
                     .withStyle(ChatFormatting.GRAY), false);
             for (String key : new String[] {Lang.HELP_ADMIN_BALANCE, Lang.HELP_ADMIN_PRICE,
@@ -217,7 +218,7 @@ public final class ShopCommand {
     private static LiteralArgumentBuilder<CommandSourceStack> balanceOperation(
             String operation, EconomyServer economy, int adminLevel) {
         return Commands.literal(operation)
-                .requires(source -> source.hasPermission(adminLevel))
+                .requires(source -> CommandPermissions.atLeast(source, adminLevel))
                 .then(Commands.argument("amount", LongArgumentType.longArg(0))
                         .executes(ctx -> adjustBalance(ctx, economy, operation, false))
                         // A large edit must be repeated with "confirm", so one mistyped
@@ -286,7 +287,7 @@ public final class ShopCommand {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_PLAYERS_ONLY));
             return 0;
         }
-        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
+        String itemId = GameIds.idArgument(ctx, "item");
         return report(ctx, economy.economy().buy(player, itemId, amount), true);
     }
 
@@ -297,7 +298,7 @@ public final class ShopCommand {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_PLAYERS_ONLY));
             return 0;
         }
-        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
+        String itemId = GameIds.idArgument(ctx, "item");
         return report(ctx, economy.economy().sell(player, itemId, count), false);
     }
 
@@ -373,7 +374,7 @@ public final class ShopCommand {
 
     private static int showPrice(CommandContext<CommandSourceStack> ctx,
                                  EconomyServer economy) {
-        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
+        String itemId = GameIds.idArgument(ctx, "item");
         if (!economy.prices().isReady()) {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_NOT_READY));
             return 0;
@@ -394,7 +395,7 @@ public final class ShopCommand {
 
     private static int setPrice(CommandContext<CommandSourceStack> ctx,
                                 EconomyServer economy) {
-        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
+        String itemId = GameIds.idArgument(ctx, "item");
         long price = LongArgumentType.getLong(ctx, "price");
         String setBy = ctx.getSource().getTextName();
 
@@ -409,7 +410,7 @@ public final class ShopCommand {
 
     private static int debugPrice(CommandContext<CommandSourceStack> ctx,
                                   EconomyServer economy) {
-        String itemId = ResourceLocationArgument.getId(ctx, "item").toString();
+        String itemId = GameIds.idArgument(ctx, "item");
         if (!economy.prices().isReady()) {
             ctx.getSource().sendFailure(Component.translatable(Lang.ERROR_NOT_READY));
             return 0;

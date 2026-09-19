@@ -24,16 +24,28 @@ public final class GuiGraphicsCompat {
     }
 
     /**
+     * Resolves a texture id once, so drawing does not re-parse it on every frame.
+     *
+     * <p>Handed back as an {@code Object} because its real type is the game’s id type,
+     * which is exactly what shared code must not name: it was {@code ResourceLocation}
+     * until 1.21.11 renamed it to {@code Identifier}. Callers keep the handle in a
+     * constant and pass it to {@link #drawIcon}.
+     */
+    public static Object texture(String id) {
+        return ResourceLocation.tryParse(id);
+    }
+
+    /**
      * Draws a square texture scaled into a smaller box.
      *
      * <p>{@code textureSize} is the texture's own edge length, passed as both the source
      * region and the texture dimensions so the whole image is sampled and scaled into the
      * destination box rather than cropped.
      */
-    public static void drawIcon(GuiGraphics graphics, ResourceLocation texture,
+    public static void drawIcon(GuiGraphics graphics, Object texture,
                                 int x, int y, int size, int textureSize) {
-        graphics.blit(RenderType::guiTextured, texture, x, y, 0.0F, 0.0F, size, size,
-                textureSize, textureSize, textureSize, textureSize);
+        graphics.blit(RenderType::guiTextured, (ResourceLocation) texture, x, y, 0.0F, 0.0F,
+                size, size, textureSize, textureSize, textureSize, textureSize);
     }
 
     /**

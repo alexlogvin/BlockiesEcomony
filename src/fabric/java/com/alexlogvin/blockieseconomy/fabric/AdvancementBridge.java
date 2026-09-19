@@ -3,7 +3,6 @@ package com.alexlogvin.blockieseconomy.fabric;
 import com.alexlogvin.blockieseconomy.platform.ServerEvents;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -29,7 +28,7 @@ public final class AdvancementBridge {
     }
 
     /** Called from the Mixin once an advancement has actually been granted. */
-    public static void fire(ServerPlayer player, ResourceLocation advancementId) {
+    public static void fire(ServerPlayer player, String advancementId) {
         if (player == null || advancementId == null) {
             return;
         }

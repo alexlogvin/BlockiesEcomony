@@ -8,7 +8,6 @@ import java.util.Map;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -38,12 +37,10 @@ public final class NeoForgeNetworking implements Networking {
 
         public static final CustomPacketPayload.Type<ToServer> TYPE =
                 new CustomPacketPayload.Type<>(
-                        // tryParse rather than fromNamespaceAndPath, which does not
-                        // exist before 1.21. This file is shared by every NeoForge node,
-                        // so one call that only resolves on the newest of them would fork
-                        // the class across the whole loader for no behavioural difference.
-                        // The id is a literal that cannot fail to parse.
-                        ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":c2s"));
+                        // Through Ids because the id type itself is per-era: it was
+                        // renamed in 1.21.11, and this file is shared by every NeoForge
+                        // node. Passing it this way means the type is never named here.
+                        Ids.of(BlockiesEconomy.MOD_ID + ":c2s"));
 
         public static final StreamCodec<FriendlyByteBuf, ToServer> CODEC = StreamCodec.of(
                 (buf, value) -> write(buf, value.channel(), value.data()),
@@ -59,7 +56,7 @@ public final class NeoForgeNetworking implements Networking {
 
         public static final CustomPacketPayload.Type<ToClient> TYPE =
                 new CustomPacketPayload.Type<>(
-                        ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":s2c"));
+                        Ids.of(BlockiesEconomy.MOD_ID + ":s2c"));
 
         public static final StreamCodec<FriendlyByteBuf, ToClient> CODEC = StreamCodec.of(
                 (buf, value) -> write(buf, value.channel(), value.data()),

@@ -2,7 +2,6 @@ package com.alexlogvin.blockieseconomy.client;
 
 import com.alexlogvin.blockieseconomy.BlockiesEconomy;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * The currency symbol: the mod's coin, drawn wherever a balance is shown.
@@ -18,12 +17,14 @@ import net.minecraft.resources.ResourceLocation;
 public final class CoinIcon {
 
     /**
-     * Built with {@code tryParse} rather than a constructor: the two-argument
-     * {@code ResourceLocation} constructor is deprecated on 1.20.1 and gone by 1.21, while
-     * {@code tryParse} is public on both. The id is a literal that cannot fail to parse.
+     * Resolved once, at class load.
+     *
+     * <p>An opaque handle rather than the id itself: the game’s id type was renamed from
+     * {@code ResourceLocation} to {@code Identifier} in 1.21.11, and naming it here would
+     * fork this class across every era for a constant that never changes.
      */
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":textures/gui/coin.png");
+    private static final Object TEXTURE =
+            GuiGraphicsCompat.texture(BlockiesEconomy.MOD_ID + ":textures/gui/coin.png");
 
     /**
      * The texture is 32x32 and is always drawn smaller than that.

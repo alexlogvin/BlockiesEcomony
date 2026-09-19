@@ -79,7 +79,7 @@ public final class NeoForgeServerEvents implements ServerEvents {
         NeoForge.EVENT_BUS.addListener((AdvancementEvent.AdvancementEarnEvent event) -> {
             if (event.getEntity() instanceof ServerPlayer) {
                 handler.onEarned((ServerPlayer) event.getEntity(),
-                        event.getAdvancement().id());
+                        event.getAdvancement().id().toString());
             }
         });
     }

@@ -9,7 +9,6 @@ import com.alexlogvin.blockieseconomy.client.ShopKeyMapping;
 import com.alexlogvin.blockieseconomy.client.ShopTooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -79,7 +78,7 @@ public final class NeoForgeClient {
      */
     private static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(
-                ResourceLocation.tryParse(BlockiesEconomy.MOD_ID + ":balance"),
+                Ids.of(BlockiesEconomy.MOD_ID + ":balance"),
                 (graphics, deltaTracker) -> BalanceHud.render(graphics));
     }
 

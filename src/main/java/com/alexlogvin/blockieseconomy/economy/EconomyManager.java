@@ -7,11 +7,11 @@ import com.alexlogvin.blockieseconomy.core.ledger.RateLimiter;
 import com.alexlogvin.blockieseconomy.core.ledger.TransactionResult;
 import com.alexlogvin.blockieseconomy.core.price.PriceEntry;
 import com.alexlogvin.blockieseconomy.core.price.TradeCalculator;
+import com.alexlogvin.blockieseconomy.platform.GameIds;
 import com.alexlogvin.blockieseconomy.platform.Profiles;
 import com.alexlogvin.blockieseconomy.price.GameAdapter;
 import com.alexlogvin.blockieseconomy.price.PriceEngine;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -305,15 +305,7 @@ public final class EconomyManager {
     // ---- helpers ---------------------------------------------------------------------
 
     private static Item resolveItem(String itemId) {
-        ResourceLocation location = ResourceLocation.tryParse(itemId);
-        if (location == null) {
-            return null;
-        }
-        // getOptional rather than get: `get` hands back the item itself up to 1.21.1 and
-        // an Optional<Holder.Reference<Item>> from 1.21.2, so no one call site can serve
-        // both eras. getOptional keeps the same signature and meaning on every version this
-        // mod targets, and folds in the containsKey check that used to guard this.
-        return BuiltInRegistries.ITEM.getOptional(location).orElse(null);
+        return GameIds.item(itemId);
     }
 
     private static TradeOutcome.Reason mapFailure(TransactionResult result) {
