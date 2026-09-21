@@ -20,7 +20,7 @@ jobs:
     outputs:
       nodes: ${{ steps.collect.outputs.nodes }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: collect
         run: |
           # Built with sed and paste rather than jq so the quoting is identical in a local
@@ -36,21 +36,28 @@ jobs:
     name: Core tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: |
             17
             21
             25
-      - uses: gradle/actions/setup-gradle@v4
+      # Pinned to v5 on purpose. v6 moved the caching half of this action into
+      # gradle-actions-caching, a closed-source component under Gradle's own Terms of Use;
+      # v5 is the last fully-MIT release and fixes the Node 20 deprecation just the same.
+      - uses: gradle/actions/setup-gradle@v5
       - run: ./gradlew :core:test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: core-test-report
           path: core/build/reports/tests/test
+          # A failure before the tests run - a Gradle configuration error, say - leaves no
+          # report at all, and a missing report is not itself worth a warning. The job has
+          # already failed and its log says why.
+          if-no-files-found: ignore
 
   jars:
     name: ${{ matrix.node }}
@@ -63,18 +70,19 @@ jobs:
       matrix:
         node: ${{ fromJSON(needs.nodes.outputs.nodes) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: |
             17
             21
             25
-      - uses: gradle/actions/setup-gradle@v4
+      # v5, not v6: see the note on the core job above.
+      - uses: gradle/actions/setup-gradle@v5
       - name: Build ${{ matrix.node }}
         run: ./gradlew :${{ matrix.node }}:build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.node }}
           path: versions/${{ matrix.node }}/build/libs/*.jar

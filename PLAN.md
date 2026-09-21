@@ -368,15 +368,13 @@ classes directory rather than the merged jar. None of these is visible to `./gra
   them changes its API, and nothing to install. Toggleable with `tooltip_prices` in
   `client.toml`. Verified in-game on 1.20.1 Fabric.
 
-  The higher tiers (a Buy button inside a recipe view, or a click that opens the shop at
-  that item) still need each viewer's own API and are **not** done. They are deliberately
-  left rather than guessed: they need `compileOnly` artifacts for three mods across two
-  Minecraft versions, EMI's Yarn-mapped API needs its own remap configuration on this
-  Mojmap project, and none of it can be verified without installing the three mods. Better
-  a floor that cannot fall out than three integrations written blind.
-- [ ] 12.2 EMI — `addRecipeDecorator`, stable on both 1.20.1 and 1.21.x → tier 1. Needs its own remap config (EMI's API is Yarn-mapped)
-- [ ] 12.3 JEI — `addRecipeButtonFactory` (19.27+) → tier 1 on 1.21.1; `addRecipeCategoryDecorator` → tier 3 on 1.20.1. Fabric needs the `jei_mod_plugin` entrypoint, not just the annotation
-- [ ] 12.4 REI — experimental `registerExtension`/`getView` → tier 2 (open Shop UI); degrade to tier 3 if the experimental API is unusable
+  **M12 is closed for 0.1.0 at this floor.** The higher tiers — a Buy button inside a recipe
+  view, or a click that opens the shop at that item — need each viewer's own API, and they
+  are now tracked under [v0.2](#v02--planned) rather than guessed at here. They want
+  `compileOnly` artifacts for three mods across every version in the matrix, EMI's
+  Yarn-mapped API needs its own remap configuration on this Mojmap project, and none of it
+  can be verified without installing the three mods. Better a floor that cannot fall out
+  than three integrations written blind.
 
 ### M13 — Localisation
 - [x] 13.1 Every user-facing string as a translation key
@@ -401,7 +399,22 @@ classes directory rather than the merged jar. None of these is visible to `./gra
         `/api/projects/<id>/upload-file`.
       - The release job uploads the artifacts the build jobs already tested, rather than
         rebuilding: `publishMods` reads the jar by path and takes no task dependency.
-- [ ] 14.5 Final `./gradlew build` across the whole matrix
+- [x] 14.5 Final `./gradlew build` across the whole matrix — **green, all 17 nodes.**
+      `./gradlew --continue :core:test :<node>:build` for every directory in `versions/`,
+      in one invocation. `--continue` rather than a loop, so a broken loader reports
+      alongside the others instead of aborting them — the same posture as `fail-fast: false`
+      in CI, but with one configuration phase instead of seventeen.
+      - 17 jars in `versions/<node>/build/libs/`, one per (era × loader), named as 14.2 fixes.
+      - `:core:test` re-run with `--rerun-tasks` rather than trusted from the build cache:
+        **121 tests, 0 failures, 0 errors.** A `FROM-CACHE` test result is a real pass, but
+        "the matrix builds" is a claim worth making from an actual run.
+      - One deprecation warning, not an error: Loom 1.18.2 flags `programArgs(vararg String)`
+        in `build-fabric.gradle.kts:74`. Harmless now; it will need replacing when that
+        overload goes.
+      - `publishMods` validated separately with `-Ppublish.dry_run` on `1.20.1-fabric` after
+        the CurseForge id landed: both platforms now resolve, and both find the jar by the
+        path in `stonecutter.gradle.kts` rather than through a task dependency. Nothing was
+        uploaded.
 
 ### M15 — Docs
 - [ ] 15.1 `README.md` — install, commands, config overview
@@ -459,6 +472,27 @@ classes directory rather than the merged jar. None of these is visible to `./gra
 
 ---
 
+## v0.2 — planned
+
+Scoped out of **0.1.0** and carried to the **0.2** release. None of it is an unknown: each
+item was investigated far enough to name the API, the obstacle and the fallback, then
+deferred on purpose. Numbering is kept from the milestone the work came from so the history
+stays traceable.
+
+### M12 — Recipe-viewer integration, tiers 1–2
+
+The vanilla-tooltip floor (12.1) shipped in 0.1.0 and already covers every viewer at tier 3.
+What follows is per-viewer deep integration. Each viewer is an opt-in `compileOnly`
+dependency that must never become a runtime one — the mod still has to load, and the shop
+still has to work, with none of the three installed.
+
+- [ ] 12.2 EMI — `addRecipeDecorator`, stable on both 1.20.1 and 1.21.x → tier 1. Needs its own remap config (EMI's API is Yarn-mapped)
+- [ ] 12.3 JEI — `addRecipeButtonFactory` (19.27+) → tier 1 on 1.21.1; `addRecipeCategoryDecorator` → tier 3 on 1.20.1. Fabric needs the `jei_mod_plugin` entrypoint, not just the annotation
+- [ ] 12.4 REI — experimental `registerExtension`/`getView` → tier 2 (open Shop UI); degrade to tier 3 if the experimental API is unusable
+- [ ] 12.5 Verify the ladder: drop EMI, JEI and REI into a run's mods folder one at a time, and all three together, on the oldest and the newest node of the matrix, and confirm each degrades as designed rather than crashing
+
+---
+
 ## Execution protocol
 
 Per the brief: work `PLAN.md` top to bottom, mark each task `[x]` on completion, and run a Gradle compile/check after each logical step. Fix any error before advancing. The gates are **M1.0** (toolchain spike — report which rung of the fallback ladder we land on), **M1.9** (all 6 jars build) and **M2.7** (`core` tests green). No feature work proceeds past a red build.
@@ -470,7 +504,7 @@ Per the brief: work `PLAN.md` top to bottom, mark each task `[x]` on completion,
 - **Runtime, per loader:** `runClient` on each node (exact Stonecutter task path confirmed at M1.0) — verify first-start price generation, HUD anchoring and auto-hide, keybind opens the shop, buy/sell round-trip, `/reload` does not empty the price graph
 - **Server-authority:** confirm a hand-crafted C2S buy packet with a bad amount is rejected server-side
 - **Dedicated server:** run a headless server + separate client to validate the join-time price sync, hash cache and delta path
-- **Integration:** drop EMI/JEI/REI into the run's mods folder individually and confirm the capability ladder degrades as designed
+- **Integration:** the vanilla-tooltip floor covers every viewer in 0.1.0; per-viewer JEI/REI/EMI verification moves with the integrations themselves to v0.2 (M12.5)
 
 ## Open risks
 
@@ -533,8 +567,50 @@ Testing found three defects that reading had not: Sell stayed enabled with an em
 inventory, the widget list doubled on every window resize, and the status line compared
 against a fresh `Component.empty()` so it was never equal.
 
-**Still open.** M12 (recipe-viewer integration), M15.1 (README is written but should be
-re-read once M12 lands), M16 (expansion).
+**Still open.** M15.1 (README is written but wants one more read before the tag) and M16
+(expansion). M12's deep per-viewer integrations moved to [v0.2](#v02--planned): the vanilla
+tooltip already covers every viewer at tier 3, so nothing in 0.1.0 waits on them, and the
+README makes no promise the shipped jar does not keep.
 
-M14.4 is done and dry-run verified against all five nodes. CurseForge stays switched off
-until `publish.curseforge_id` is filled in with the numeric id from the project page.
+M14.4 is done and dry-run verified. **CurseForge is now switched on**: `publish.curseforge_id`
+is `1702666`, so `publishMods` targets both platforms — re-confirmed with
+`-Ppublish.dry_run` on `1.20.1-fabric`, which resolved the jar and both platform configs
+without uploading anything. Both `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN` are present as repo
+secrets, so a tag push now publishes to both. Note the change in failure mode this brings:
+with the id blank, a missing token meant CurseForge was skipped silently; with it set, the
+publish step fails loudly if the token ever goes away. That is the right way round — a
+release that silently half-published was the worse outcome.
+
+---
+
+## Execution log — M14.5 and the CI green-up
+
+**The matrix builds.** All 17 nodes, one `--continue` invocation, `:core:test` green at 121
+tests. Recorded against 14.5 above; nothing surprising came out of it, which is the point of
+running it before a tag rather than after.
+
+**CI was red for a reason that had nothing to do with the code.** `./gradlew: Permission
+denied`, exit 126, on every Linux runner. `gradlew` was committed as mode `100644`: Git
+stores the POSIX executable bit in the tree entry, and a Windows checkout cannot set it, so
+the wrapper arrived on the runner as a plain file. Fixed with `git update-index --chmod=+x
+gradlew` — an index-mode change, no content change — and the same for
+`scripts/build-release.sh`, which had the same problem waiting for the first person to run
+it on Linux.
+
+Worth naming the decoy: the job also warned `No files were found with the provided path:
+core/build/reports/tests/test`. The path was correct. The report was missing because Gradle
+never ran, so the warning was a symptom of the exit-126 failure rather than a second bug.
+The upload now carries `if-no-files-found: ignore`, because a failure *before* the tests
+cannot produce a report and the job log already says why it failed.
+
+**Every action moved off Node 20**, which GitHub now force-runs on Node 24 and will stop
+supporting: checkout v4 → v7, setup-java v4 → v6, upload-artifact v4 → v7,
+download-artifact v4 → v8, `action-gh-release` v2 → v3. None of the inputs this repo uses
+changed across those majors. `download-artifact` v8 now *errors* on a digest mismatch where
+it used to warn, which is the behaviour a release pipeline wants anyway.
+
+**`gradle/actions` is pinned at v5 deliberately, not out of caution.** v6 extracted the
+caching half of the action into `gradle-actions-caching`, a closed-source component under
+Gradle's own Terms of Use; v5 is the last fully-MIT release and it resolves the Node 20
+deprecation just the same. The pin is commented in both workflows so it does not get
+"upgraded" by a routine dependency sweep.
